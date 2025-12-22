@@ -51,6 +51,19 @@
             0%, 100% { transform: scale(0.8); opacity: 0.5; }
             50% { transform: scale(1.1); opacity: 1; }
         }
+        
+        /* Chat Bubble Styles */
+        .chat-bubble {
+            position: relative;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .chat-bubble.fem { border-left: 4px solid #ec4899; }
+        .chat-bubble.masc { border-left: 4px solid #6b7280; }
+        .chat-bubble.andro { border-left: 4px solid #a855f7; }
     </style>
 </head>
 <body class="min-h-screen bg-[#0f0518] text-white selection:bg-pink-500 selection:text-white overflow-x-hidden">
@@ -67,7 +80,8 @@
         <div class="glass-panel p-8 rounded-3xl max-w-md w-full text-center relative overflow-hidden border-pink-500/30 max-h-[90vh] overflow-y-auto">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
             <div class="mb-6">
-                <i data-lucide="sparkles" class="w-12 h-12 text-pink-400 mx-auto mb-4"></i>
+                <!-- Fallback to icon if image missing, user instructed to add logo.png -->
+                <img src="logo.png" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=FemVoice'" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-pink-500/30 object-cover shadow-[0_0_20px_rgba(236,72,153,0.4)]">
                 <h2 class="text-3xl font-bold text-white mb-2">Dollhouse Registry</h2>
                 <p class="text-pink-200/70 text-sm">Enter your femme name to begin your transformation.</p>
             </div>
@@ -117,10 +131,13 @@
         
         <!-- Header -->
         <header class="flex justify-between items-center mb-6 md:mb-12">
-            <div class="flex items-center gap-3">
-                <div class="p-3 bg-gradient-to-tr from-pink-500 to-purple-600 rounded-xl shadow-lg shadow-pink-500/20 shrink-0">
-                    <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+            <div class="flex items-center gap-4">
+                <!-- UPDATED LOGO: Uses 'logo.png' -->
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <img src="logo.png" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=FemVoice'" alt="FemVoice Doll Logo" class="relative w-16 h-16 rounded-xl object-cover border-2 border-[#1a1025] shadow-2xl">
                 </div>
+                
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-200 to-pink-400 leading-tight">
                         FemVoice <span class="font-light italic block md:inline">Doll</span>
@@ -156,6 +173,9 @@
                         <div class="grid grid-cols-2 md:flex md:flex-col gap-3">
                             <button onclick="switchMode('practice')" id="btn-practice" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-pink-500/20 text-white font-medium text-sm md:text-base">
                                 <i data-lucide="mic" class="w-4 h-4 shrink-0"></i> <span>Practice</span>
+                            </button>
+                            <button onclick="switchMode('talk')" id="btn-talk" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="message-circle" class="w-4 h-4 shrink-0"></i> <span>Talk & Train</span>
                             </button>
                             <button onclick="switchMode('tutorials')" id="btn-tutorials" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
                                 <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span>Training</span>
@@ -266,6 +286,40 @@
                             <audio id="audio-playback" class="hidden"></audio>
                         </div>
                     </div>
+                </div>
+
+                <!-- VIEW: TALK TO TRAIN (NEW) -->
+                <div id="view-talk" class="view-section hidden fade-in flex-col gap-6 h-full">
+                     <div class="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[500px] flex flex-col">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                                    <i data-lucide="message-circle" class="w-6 h-6 text-pink-400"></i> Talk & Train
+                                </h2>
+                                <p class="text-sm text-gray-400">Conversational Practice. Just talk naturally!</p>
+                            </div>
+                            <button id="talk-btn" onclick="toggleTalkMode()" class="px-6 py-2 rounded-full bg-pink-500 text-white font-bold text-sm shadow-lg hover:bg-pink-600 transition flex items-center gap-2">
+                                <i data-lucide="mic" class="w-4 h-4"></i> Start Talking
+                            </button>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div id="talk-log" class="flex-grow overflow-y-auto space-y-4 mb-4 pr-2 max-h-[400px]">
+                            <div class="text-center text-gray-500 py-10 italic" id="talk-placeholder">
+                                Press start and say anything! <br> "Hello, how are you today?"
+                            </div>
+                        </div>
+                        
+                        <!-- Status Bar -->
+                        <div class="mt-auto pt-4 border-t border-white/10 flex justify-between items-center text-xs text-gray-500">
+                             <div class="flex items-center gap-2">
+                                 <div id="talk-status-dot" class="w-2 h-2 rounded-full bg-gray-500"></div>
+                                 <span id="talk-status-text">Ready</span>
+                             </div>
+                             <div>Listening for phrases...</div>
+                        </div>
+                     </div>
                 </div>
 
                 <!-- VIEW: TUTORIALS -->
@@ -403,6 +457,11 @@
         // Tone Generator State
         let oscillator = null;
         let gainNode = null;
+        
+        // Talk & Train State
+        let recognition = null;
+        let isTalking = false;
+        let talkPitchData = []; // Accumulates pitch per phrase
 
         // --- AUTH & LOCAL STORAGE ---
 
@@ -470,14 +529,11 @@
             const word = WORD_BANK[currentWordIndex].word;
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(word);
-                utterance.pitch = 1.2; // Slightly higher pitch
-                utterance.rate = 0.9;  // Slightly slower
-                
-                // Try to find a female voice
+                utterance.pitch = 1.2; 
+                utterance.rate = 0.9;  
                 const voices = window.speechSynthesis.getVoices();
                 const femVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google US English'));
                 if(femVoice) utterance.voice = femVoice;
-
                 window.speechSynthesis.speak(utterance);
             } else {
                 alert("Sorry, your browser doesn't support Text-to-Speech!");
@@ -486,33 +542,21 @@
 
         // 2. Reference Tones
         function playTone(freq) {
-            stopTone(); // Stop any running tone
-            
+            stopTone(); 
             const ToneCtx = new (window.AudioContext || window.webkitAudioContext)();
             oscillator = ToneCtx.createOscillator();
             gainNode = ToneCtx.createGain();
-
             oscillator.type = 'sine';
             oscillator.frequency.value = freq;
-            
-            gainNode.gain.setValueAtTime(0.1, ToneCtx.currentTime); // Low volume
-            
+            gainNode.gain.setValueAtTime(0.1, ToneCtx.currentTime); 
             oscillator.connect(gainNode);
             gainNode.connect(ToneCtx.destination);
-            
             oscillator.start();
         }
 
         function stopTone() {
-            if (oscillator) {
-                oscillator.stop();
-                oscillator.disconnect();
-                oscillator = null;
-            }
-            if(gainNode) {
-                gainNode.disconnect();
-                gainNode = null;
-            }
+            if (oscillator) { oscillator.stop(); oscillator.disconnect(); oscillator = null; }
+            if(gainNode) { gainNode.disconnect(); gainNode = null; }
         }
 
         // 3. Audio Recorder (Vanity Mirror)
@@ -523,16 +567,11 @@
             const playBtn = document.getElementById('play-btn');
 
             if (!isRecording) {
-                // START RECORDING
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
-
-                    mediaRecorder.ondataavailable = event => {
-                        audioChunks.push(event.data);
-                    };
-
+                    mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                         audioBlobUrl = URL.createObjectURL(audioBlob);
@@ -542,26 +581,16 @@
                         playBtn.classList.replace('bg-white/5', 'bg-green-500/20');
                         playBtn.classList.replace('border-white/5', 'border-green-500/30');
                         playBtn.disabled = false;
-                        
-                        // Clean up stream tracks
                         stream.getTracks().forEach(track => track.stop());
                     };
-
                     mediaRecorder.start();
                     isRecording = true;
                     dot.classList.remove('hidden');
                     text.innerText = "Stop";
                     btn.classList.add('bg-red-500/40');
-                    
-                    // Disable Play while recording
                     playBtn.disabled = true;
-
-                } catch(e) {
-                    console.error("Recording error", e);
-                    alert("Mic access needed to record.");
-                }
+                } catch(e) { console.error(e); alert("Mic access needed to record."); }
             } else {
-                // STOP RECORDING
                 mediaRecorder.stop();
                 isRecording = false;
                 dot.classList.add('hidden');
@@ -572,19 +601,149 @@
 
         function playRecording() {
             const audio = document.getElementById('audio-playback');
-            if(audioBlobUrl) {
-                audio.play();
+            if(audioBlobUrl) { audio.play(); }
+        }
+
+        // 4. TALK TO TRAIN (Web Speech API)
+        function toggleTalkMode() {
+            const btn = document.getElementById('talk-btn');
+            const statusDot = document.getElementById('talk-status-dot');
+            const statusText = document.getElementById('talk-status-text');
+
+            if(isTalking) {
+                // STOP
+                if(recognition) recognition.stop();
+                if(audioContext) audioContext.close();
+                if(microphone) microphone.getTracks().forEach(track => track.stop());
+                cancelAnimationFrame(animationId);
+                
+                isTalking = false;
+                btn.classList.replace('bg-gray-500', 'bg-pink-500');
+                btn.innerHTML = '<i data-lucide="mic" class="w-4 h-4"></i> Start Talking';
+                statusDot.classList.replace('bg-green-500', 'bg-gray-500');
+                statusDot.classList.remove('animate-pulse');
+                statusText.innerText = "Ready";
+                
+            } else {
+                // START
+                // 1. Start Speech Recognition
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    alert("Your browser does not support Speech Recognition. Try Chrome or Edge!");
+                    return;
+                }
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                     document.getElementById('talk-placeholder').style.display = 'none';
+                     statusDot.classList.replace('bg-gray-500', 'bg-green-500');
+                     statusDot.classList.add('animate-pulse');
+                     statusText.innerText = "Listening...";
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[event.results.length - 1][0].transcript;
+                    analyzePhrase(transcript);
+                    talkPitchData = []; // Reset for next phrase
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Speech error", event.error);
+                    toggleTalkMode(); // Stop on error
+                };
+
+                recognition.start();
+
+                // 2. Start Audio Analysis (Pitch Tracking) in background
+                startBackgroundPitchTracker();
+                
+                isTalking = true;
+                btn.classList.replace('bg-pink-500', 'bg-gray-500');
+                btn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i> Stop';
             }
+        }
+
+        async function startBackgroundPitchTracker() {
+             try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                microphone = stream;
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+
+                const bufferLength = analyser.frequencyBinCount;
+                const timeDomainArray = new Float32Array(bufferLength);
+                
+                const loop = () => {
+                    if(!isTalking) return;
+                    animationId = requestAnimationFrame(loop);
+                    analyser.getFloatTimeDomainData(timeDomainArray);
+                    const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
+                    if(pitch > 70 && pitch < 500) {
+                        talkPitchData.push(pitch);
+                    }
+                };
+                loop();
+
+             } catch(e) {
+                 console.error(e);
+             }
+        }
+
+        function analyzePhrase(text) {
+            const log = document.getElementById('talk-log');
+            
+            // Calculate Average Pitch for this phrase
+            let avgPitch = 0;
+            let feedback = "No audio detected";
+            let type = "masc"; // default style
+
+            if(talkPitchData.length > 0) {
+                avgPitch = Math.round(talkPitchData.reduce((a, b) => a + b, 0) / talkPitchData.length);
+                
+                if(avgPitch > 175 && avgPitch < 250) {
+                    feedback = "Excellent! Perfect feminine range.";
+                    type = "fem";
+                } else if (avgPitch >= 145 && avgPitch <= 175) {
+                    feedback = "Good, aiming for androgynous.";
+                    type = "andro";
+                } else if (avgPitch < 145) {
+                    feedback = "A bit deep. Try raising your larynx.";
+                    type = "masc";
+                } else {
+                    feedback = "Very high! Be careful of strain.";
+                    type = "fem";
+                }
+            }
+
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${type} fade-in`;
+            bubble.innerHTML = `
+                <div class="font-bold text-white mb-1">"${text}"</div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-pink-300 font-mono">${avgPitch > 0 ? avgPitch + ' Hz' : '--'}</span>
+                    <span class="text-gray-400 italic">${feedback}</span>
+                </div>
+            `;
+            
+            log.appendChild(bubble);
+            log.scrollTop = log.scrollHeight;
         }
 
 
         // --- UI NAVIGATION ---
         
         function switchMode(mode) {
-            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard'];
+            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard', 'talk'];
             
-            // Stop mic/recorder/tone if switching views
+            // Cleanup previous modes
             if(isListening && mode !== 'practice') toggleMic();
+            if(isTalking && mode !== 'talk') toggleTalkMode();
             stopTone();
 
             views.forEach(v => {
@@ -595,7 +754,7 @@
                     btn.classList.replace('bg-white/5', 'bg-pink-500/20');
                     btn.classList.replace('text-pink-200', 'text-white');
                     view.classList.remove('hidden');
-                    if(v === 'tutorials' || v === 'vocabulary' || v === 'scoreboard') view.classList.add('flex');
+                    if(v === 'tutorials' || v === 'vocabulary' || v === 'scoreboard' || v === 'talk') view.classList.add('flex');
                 } else {
                     btn.classList.replace('bg-pink-500/20', 'bg-white/5');
                     btn.classList.replace('text-white', 'text-pink-200');
