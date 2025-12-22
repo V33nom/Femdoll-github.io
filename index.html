@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FemVoice Doll</title>
+    
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons (via CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-script { font-family: 'Dancing Script', cursive; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1025; }
+        ::-webkit-scrollbar-thumb { background: #4a305e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+        /* Animation Utilities */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .breathing-circle {
+            animation: breathe 8s infinite ease-in-out;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#0f0518] text-white selection:bg-pink-500 selection:text-white overflow-x-hidden">
+
+    <!-- Background Ambience -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-pink-900/20 rounded-full blur-[120px]"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+    </div>
+
+    <!-- Login Modal (Overlay) -->
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden p-4">
+        <div class="glass-panel p-8 rounded-3xl max-w-md w-full text-center relative overflow-hidden border-pink-500/30 max-h-[90vh] overflow-y-auto">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
+            <div class="mb-6">
+                <i data-lucide="sparkles" class="w-12 h-12 text-pink-400 mx-auto mb-4"></i>
+                <h2 class="text-3xl font-bold text-white mb-2">Dollhouse Registry</h2>
+                <p class="text-pink-200/70 text-sm">Enter your femme name to begin your transformation.</p>
+            </div>
+            <input type="text" id="username-input" placeholder="Your Fem Name..." class="w-full bg-white/5 border border-pink-500/30 rounded-xl px-4 py-3 text-white placeholder-pink-300/30 focus:outline-none focus:border-pink-500 focus:bg-pink-500/10 transition mb-6 text-center text-lg">
+            <button onclick="registerUser()" class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition-transform">
+                Become a Doll 💋
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Card Modal -->
+    <div id="report-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="glass-panel p-1 rounded-3xl max-w-sm w-full animate-fadeIn max-h-[90vh] overflow-y-auto">
+            <div class="bg-[#130820] rounded-[22px] p-6 text-center relative overflow-hidden">
+                <button onclick="closeReport()" class="absolute top-4 right-4 text-gray-500 hover:text-white p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <h3 class="text-pink-400 font-script text-3xl mb-1">Session Report</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-6">Voice Analysis</p>
+                <div class="w-32 h-32 mx-auto rounded-full border-4 border-pink-500/20 flex items-center justify-center mb-6 relative">
+                    <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="#ec4899" stroke-width="4" stroke-dasharray="289" stroke-dashoffset="289" id="score-circle" class="transition-all duration-1000 ease-out"></circle>
+                    </svg>
+                    <div class="text-center">
+                        <span id="report-score" class="text-4xl font-bold text-white block">0%</span>
+                        <span class="text-[10px] text-pink-400">FEMME SCORE</span>
+                    </div>
+                </div>
+                <div class="bg-pink-500/5 rounded-xl p-4 mb-6 border border-pink-500/10">
+                    <p id="report-narrative" class="text-sm text-gray-200 italic leading-relaxed">"Analysis pending..."</p>
+                </div>
+                <div class="flex justify-center gap-8 mb-6 text-center">
+                    <div>
+                        <span id="report-avg" class="block text-xl font-bold text-white">0 Hz</span>
+                        <span class="text-[10px] text-gray-500 uppercase">Avg Pitch</span>
+                    </div>
+                    <div>
+                        <span id="report-time" class="block text-xl font-bold text-white">0s</span>
+                        <span class="text-[10px] text-gray-500 uppercase">Duration</span>
+                    </div>
+                </div>
+                <button onclick="closeReport()" class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-pink-300 font-medium border border-white/10 transition">Keep Practicing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 container mx-auto px-4 py-6 md:py-8 max-w-4xl pb-24 md:pb-8">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6 md:mb-12">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-gradient-to-tr from-pink-500 to-purple-600 rounded-xl shadow-lg shadow-pink-500/20 shrink-0">
+                    <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-200 to-pink-400 leading-tight">
+                        FemVoice <span class="font-light italic block md:inline">Doll</span>
+                    </h1>
+                    <p class="text-pink-400 text-[10px] md:text-xs tracking-widest uppercase opacity-80">Sculpt Your Sound</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div id="user-display-name" class="text-sm font-bold text-white">Guest</div>
+                    <div class="text-[10px] text-pink-400 uppercase tracking-wider">Level 1 Doll</div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 p-[2px] cursor-pointer shrink-0" onclick="logout()">
+                    <div class="w-full h-full rounded-full bg-black flex items-center justify-center text-xs font-bold text-pink-300 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Fem" id="user-avatar" class="w-full h-full opacity-80">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+            
+            <!-- Sidebar / Controls -->
+            <div class="md:col-span-4 flex flex-col gap-6">
+                <div class="glass-panel rounded-3xl p-6 relative overflow-hidden h-full flex flex-col justify-between min-h-[auto] md:min-h-[300px]">
+                    <div class="absolute -top-20 -right-20 w-40 h-40 bg-pink-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
+                            <i data-lucide="crown" class="w-5 h-5 text-yellow-400"></i> Dashboard
+                        </h2>
+                        <!-- Responsive Grid for buttons on mobile -->
+                        <div class="grid grid-cols-2 md:flex md:flex-col gap-3">
+                            <button onclick="switchMode('practice')" id="btn-practice" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-pink-500/20 text-white font-medium text-sm md:text-base">
+                                <i data-lucide="mic" class="w-4 h-4 shrink-0"></i> <span>Practice</span>
+                            </button>
+                            <button onclick="switchMode('tutorials')" id="btn-tutorials" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span>Training</span>
+                            </button>
+                            <button onclick="switchMode('vocabulary')" id="btn-vocabulary" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="library" class="w-4 h-4 shrink-0"></i> <span>Words</span>
+                            </button>
+                            <button onclick="switchMode('scoreboard')" id="btn-scoreboard" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i> <span>Scores</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Breathing Circle -->
+                    <div class="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/10 flex items-center gap-4 justify-center md:justify-start">
+                        <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center relative shrink-0">
+                             <div class="absolute inset-0 bg-pink-500/40 rounded-full breathing-circle"></div>
+                             <div class="relative text-[10px] font-bold">In / Out</div>
+                        </div>
+                        <div class="text-xs text-gray-400 italic">"Breathe deep into your tummy."</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="md:col-span-8 flex flex-col gap-6 relative min-h-[500px]">
+                
+                <!-- VIEW: PRACTICE (Default) -->
+                <div id="view-practice" class="view-section fade-in flex flex-col gap-6">
+                    
+                    <!-- Reference Tones Bar -->
+                    <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                         <div class="text-xs text-pink-300 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <i data-lucide="tuning-fork" class="w-4 h-4"></i> Pitch Pipe
+                         </div>
+                         <div class="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
+                             <button onclick="playTone(175)" class="flex-1 sm:flex-none px-3 py-2 bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/30 rounded-lg text-xs font-bold text-purple-200 transition min-w-[70px]">F3 (175)</button>
+                             <button onclick="playTone(200)" class="flex-1 sm:flex-none px-3 py-2 bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 rounded-lg text-xs font-bold text-pink-200 transition min-w-[70px]">G3 (200)</button>
+                             <button onclick="playTone(220)" class="flex-1 sm:flex-none px-3 py-2 bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 rounded-lg text-xs font-bold text-pink-200 transition min-w-[70px]">A3 (220)</button>
+                             <button onclick="stopTone()" class="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 border border-white/5"><i data-lucide="square" class="w-4 h-4 fill-current"></i></button>
+                         </div>
+                    </div>
+
+                    <!-- Visualizer Card -->
+                    <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden flex flex-col items-center justify-center border-pink-500/20 shadow-pink-900/20 min-h-[280px] md:min-h-[320px]">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                        </div>
+                        <div class="w-full h-40 md:h-48 flex items-center justify-center relative">
+                            <canvas id="audioCanvas" class="w-full h-full opacity-80"></canvas>
+                            <div id="start-prompt" class="absolute inset-0 flex items-center justify-center flex-col text-center animate-pulse pointer-events-none">
+                                <p class="text-pink-300/50 font-light text-2xl md:text-4xl">Tap to Speak</p>
+                            </div>
+                        </div>
+                        <div class="mt-2 md:mt-4 text-center z-10 h-8">
+                            <p id="feedback-text" class="text-base md:text-lg font-medium text-gray-500 transition-all duration-300">Ready to glow?</p>
+                        </div>
+                        <div class="absolute -bottom-6 md:-bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+                            <button id="mic-toggle" onclick="toggleMic()" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-[0_0_30px_rgba(236,72,153,0.6)] border-4 border-[#1a1025] flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer tap-highlight-transparent">
+                                <i data-lucide="mic" id="mic-icon" class="w-6 h-6 md:w-8 md:h-8"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pitch Display -->
+                    <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden mt-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-pink-300 font-bold flex items-center gap-2">
+                                <i data-lucide="music" class="w-4 h-4"></i> Real-time Hz
+                            </h3>
+                            <span id="pitch-display" class="px-2 py-0.5 rounded text-xs font-bold bg-gray-500/20 text-gray-300 border border-gray-500/30">
+                                0 Hz
+                            </span>
+                        </div>
+                        <div class="relative h-20 md:h-24 flex items-end justify-between gap-1 px-2 border-b border-white/5 pb-2">
+                            <div class="absolute left-0 bottom-0 text-[10px] text-gray-500">80Hz</div>
+                            <div class="absolute right-0 bottom-0 text-[10px] text-gray-500">400Hz</div>
+                            <div class="absolute bottom-0 h-full bg-pink-500/10 border-x border-pink-500/20" style="left: 30%; width: 25%;">
+                                <div class="absolute top-2 w-full text-center text-[10px] text-pink-500 font-bold tracking-widest opacity-50">GOAL</div>
+                            </div>
+                            <div id="pitch-needle" class="absolute bottom-0 w-1 bg-white h-full transition-all duration-200 shadow-[0_0_10px_white] z-10 left-0">
+                                <div class="w-3 h-3 bg-white rounded-full absolute top-0 -left-1"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2 text-center">Aim for the pink zone!</p>
+                    </div>
+
+                    <!-- Audio Recorder (Vanity Mirror) -->
+                    <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-pink-300 font-bold flex items-center gap-2">
+                                <i data-lucide="cassette-tape" class="w-4 h-4"></i> Vanity Mirror
+                            </h3>
+                        </div>
+                        <div class="bg-black/40 rounded-xl p-4 flex flex-col items-center gap-4">
+                            <p class="text-xs text-gray-400 text-center">Record and playback to check your weight & resonance.</p>
+                            <div class="flex gap-4 w-full justify-center">
+                                <button id="record-btn" onclick="toggleRecording()" class="flex-1 py-3 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 transition flex items-center justify-center gap-2 cursor-pointer touch-manipulation">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse hidden" id="record-dot"></div>
+                                    <span id="record-text">Record</span>
+                                </button>
+                                <button id="play-btn" onclick="playRecording()" disabled class="flex-1 py-3 rounded-lg bg-white/5 text-gray-500 border border-white/5 disabled:opacity-50 transition flex items-center justify-center gap-2 cursor-pointer touch-manipulation">
+                                    <i data-lucide="play" class="w-3 h-3"></i> Play
+                                </button>
+                            </div>
+                            <audio id="audio-playback" class="hidden"></audio>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: TUTORIALS -->
+                <div id="view-tutorials" class="view-section hidden fade-in flex-col gap-6">
+                    <div id="tutorial-list" class="grid gap-4"></div>
+                    <div id="tutorial-detail" class="hidden glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden min-h-[400px]">
+                        <button onclick="closeTutorial()" class="text-sm text-pink-400 hover:text-white mb-6 flex items-center gap-2">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to list
+                        </button>
+                        <h2 id="tut-title" class="text-2xl md:text-3xl font-bold text-white mb-2"></h2>
+                        <p id="tut-desc" class="text-gray-400 mb-8 border-b border-white/10 pb-4"></p>
+                        <div id="tut-steps" class="space-y-6"></div>
+                        <div class="mt-12 bg-pink-500/10 p-6 rounded-2xl border border-pink-500/20">
+                            <h4 class="font-bold text-pink-300 mb-2 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i> Pro Tip
+                            </h4>
+                            <p class="text-sm text-gray-300">
+                                Try doing this exercise while looking in a mirror to ensure you aren't straining your neck muscles.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: VOCABULARY -->
+                <div id="view-vocabulary" class="view-section hidden fade-in flex-col gap-6 h-full">
+                    <div class="glass-panel rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col items-center justify-between min-h-[400px] border-pink-500/20">
+                         <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-purple-500/5"></div>
+                         <div class="z-10 w-full flex flex-wrap justify-between items-center mb-4 gap-2">
+                             <span id="card-category" class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-pink-400 uppercase border border-pink-500/30 px-3 py-1 rounded-full bg-pink-500/10">Bright Vowels</span>
+                             <button onclick="speakWord()" class="p-2 rounded-full bg-white/5 hover:bg-white/10 text-pink-300 border border-pink-500/30 flex items-center gap-2 text-xs font-bold px-3 transition">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i> Hear It
+                             </button>
+                         </div>
+                         <div class="z-10 flex flex-col items-center justify-center flex-grow text-center my-8">
+                             <h2 id="card-word" class="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-pink-200 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] mb-6 transition-all duration-300 transform break-words w-full">Heat</h2>
+                             <p id="card-tip" class="text-gray-300 text-base md:text-lg max-w-md font-light italic">"Smile wide! Feel the buzz behind your teeth."</p>
+                         </div>
+                         <div class="z-10 w-full flex justify-between items-center gap-2 md:gap-4">
+                             <button onclick="changeWord(-1)" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition group">
+                                 <i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-white"></i>
+                             </button>
+                             <button onclick="toggleMic()" class="flex-1 max-w-[200px] px-4 py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold shadow-lg shadow-pink-500/30 flex items-center justify-center gap-2 transition transform hover:scale-105 active:scale-95 touch-manipulation">
+                                 <i data-lucide="mic" class="w-5 h-5"></i> <span class="hidden sm:inline">Practice</span>
+                             </button>
+                             <button onclick="changeWord(1)" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition group">
+                                 <i data-lucide="arrow-right" class="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-white"></i>
+                             </button>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SCOREBOARD -->
+                <div id="view-scoreboard" class="view-section hidden fade-in flex-col gap-6">
+                    <div class="glass-panel rounded-3xl p-4 md:p-8 relative overflow-hidden min-h-[500px]">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="p-3 bg-pink-500/20 rounded-xl text-pink-400">
+                                <i data-lucide="trophy" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">Glitter Board</h2>
+                                <p class="text-sm text-gray-400">Your most stunning performances.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+                            <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
+                                <div id="stat-sessions" class="text-xl md:text-2xl font-bold text-white mb-1">0</div>
+                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Sessions</div>
+                            </div>
+                            <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
+                                <div id="stat-best" class="text-xl md:text-2xl font-bold text-white mb-1">0%</div>
+                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Best Score</div>
+                            </div>
+                            <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
+                                <div id="stat-avg" class="text-xl md:text-2xl font-bold text-white mb-1">0 Hz</div>
+                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Avg Hz</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-12 text-[10px] md:text-xs text-gray-500 uppercase tracking-wider mb-4 px-2 md:px-4">
+                            <div class="col-span-6">Date</div>
+                            <div class="col-span-3 text-center">Avg Hz</div>
+                            <div class="col-span-3 text-right">Score</div>
+                        </div>
+                        <div id="score-list" class="space-y-3">
+                            <div class="text-center text-gray-500 py-10 italic">No sessions recorded yet, babe. Start practicing!</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- DATA ---
+        const TUTORIALS = [
+            { id: 1, title: "The Whisper Siren", level: "Beginner", description: "Learn to raise your larynx naturally without strain.", steps: ["Relax your jaw and shoulders completely.", "Whisper a generic 'E' sound (as in 'Heat').", "Slowly slide the pitch of your whisper up and down like a siren.", "Focus on the sensation of your Adam's apple rising as the pitch goes up.", "Try to hold the high position for 5 seconds."] },
+            { id: 2, title: "Vowel Brightening", level: "Intermediate", description: "Shift resonance from chest to head using bright vowels.", steps: ["Say the word 'Heat'. Notice how small and buzzy it feels in your mouth?", "Now say 'Hot'. Notice how it drops to your chest?", "Your goal: Say 'Hot' but try to keep the buzz in the same place as 'Heat'.", "Practice shifting between: Hee - Haa - Hoo, keeping them all 'bright'."] },
+            { id: 3, title: "Big Dog, Small Dog", level: "Fundamentals", description: "Understanding vocal weight.", steps: ["Pant like a big, heavy dog (Hah-Hah-Hah). Feel the chest vibration.", "Now pant like a tiny chihuahua (Hih-Hih-Hih). Feel it high in the throat.", "The 'Small Dog' pant is the muscle coordination we want for a feminine voice.", "Try to speak a simple phrase immediately after the 'Small Dog' pant."] }
+        ];
+
+        const WORD_BANK = [
+            { word: "Heat", category: "Bright Vowels", tip: "Smile wide! Feel the buzz behind your top teeth." },
+            { word: "Key", category: "Bright Vowels", tip: "Keep the tongue high and forward." },
+            { word: "See", category: "Bright Vowels", tip: "Hissss like a snake first to find the spot." },
+            { word: "Hey", category: "Soft Onset", tip: "Let a little breath out before the sound." },
+            { word: "Hi", category: "Soft Onset", tip: "Light and airy, not punchy." },
+            { word: "Glowing", category: "Intonation", tip: "Glide pitch UP on 'Glo' and down on 'wing'." },
+            { word: "Shining", category: "Intonation", tip: "Imagine drawing a rainbow with your voice." },
+            { word: "Dreaming", category: "Intonation", tip: "Stretch the vowels out smoothly." },
+            { word: "Absolutely", category: "Articulation", tip: "Crisp consonants, light tongue taps." },
+            { word: "Wonderful", category: "Melody", tip: "Start high, dip low, end middle." }
+        ];
+
+        // --- STATE & AUDIO ---
+        let audioContext = null;
+        let analyser = null;
+        let microphone = null;
+        let animationId = null;
+        let isListening = false;
+        let canvas, ctx;
+        let currentWordIndex = 0;
+        
+        // Session Recording
+        let sessionData = [];
+        let sessionStartTime = 0;
+        let currentUser = null;
+
+        // Vanity Recorder State
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioBlobUrl = null;
+
+        // Tone Generator State
+        let oscillator = null;
+        let gainNode = null;
+
+        // --- AUTH & LOCAL STORAGE ---
+
+        window.onload = () => {
+            lucide.createIcons();
+            checkAuth();
+            window.addEventListener('resize', () => {
+                const canvasEl = document.getElementById('audioCanvas');
+                if(canvasEl && canvasEl.offsetParent !== null) {
+                    canvasEl.width = canvasEl.parentElement.offsetWidth;
+                    canvasEl.height = 200;
+                }
+            });
+        };
+
+        function checkAuth() {
+            const storedUser = localStorage.getItem('femvoice_user');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                updateUserDisplay();
+                document.getElementById('login-modal').classList.add('hidden');
+            } else {
+                document.getElementById('login-modal').classList.remove('hidden');
+            }
+        }
+
+        function registerUser() {
+            const input = document.getElementById('username-input');
+            const name = input.value.trim();
+            if (name) {
+                currentUser = {
+                    name: name,
+                    sessions: [],
+                    joined: new Date().toISOString()
+                };
+                saveUser();
+                updateUserDisplay();
+                document.getElementById('login-modal').classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            if(confirm("Are you sure you want to log out, doll?")) {
+                localStorage.removeItem('femvoice_user');
+                location.reload();
+            }
+        }
+
+        function saveUser() {
+            localStorage.setItem('femvoice_user', JSON.stringify(currentUser));
+        }
+
+        function updateUserDisplay() {
+            if(currentUser) {
+                document.getElementById('user-display-name').innerText = currentUser.name;
+                document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.name}`;
+                updateScoreboardUI();
+            }
+        }
+
+        // --- NEW FEATURES ---
+
+        // 1. Text to Speech
+        function speakWord() {
+            const word = WORD_BANK[currentWordIndex].word;
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.pitch = 1.2; // Slightly higher pitch
+                utterance.rate = 0.9;  // Slightly slower
+                
+                // Try to find a female voice
+                const voices = window.speechSynthesis.getVoices();
+                const femVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google US English'));
+                if(femVoice) utterance.voice = femVoice;
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Sorry, your browser doesn't support Text-to-Speech!");
+            }
+        }
+
+        // 2. Reference Tones
+        function playTone(freq) {
+            stopTone(); // Stop any running tone
+            
+            const ToneCtx = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = ToneCtx.createOscillator();
+            gainNode = ToneCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = freq;
+            
+            gainNode.gain.setValueAtTime(0.1, ToneCtx.currentTime); // Low volume
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ToneCtx.destination);
+            
+            oscillator.start();
+        }
+
+        function stopTone() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+                oscillator = null;
+            }
+            if(gainNode) {
+                gainNode.disconnect();
+                gainNode = null;
+            }
+        }
+
+        // 3. Audio Recorder (Vanity Mirror)
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            const dot = document.getElementById('record-dot');
+            const text = document.getElementById('record-text');
+            const playBtn = document.getElementById('play-btn');
+
+            if (!isRecording) {
+                // START RECORDING
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        audioBlobUrl = URL.createObjectURL(audioBlob);
+                        const audio = document.getElementById('audio-playback');
+                        audio.src = audioBlobUrl;
+                        playBtn.classList.replace('text-gray-500', 'text-white');
+                        playBtn.classList.replace('bg-white/5', 'bg-green-500/20');
+                        playBtn.classList.replace('border-white/5', 'border-green-500/30');
+                        playBtn.disabled = false;
+                        
+                        // Clean up stream tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    dot.classList.remove('hidden');
+                    text.innerText = "Stop";
+                    btn.classList.add('bg-red-500/40');
+                    
+                    // Disable Play while recording
+                    playBtn.disabled = true;
+
+                } catch(e) {
+                    console.error("Recording error", e);
+                    alert("Mic access needed to record.");
+                }
+            } else {
+                // STOP RECORDING
+                mediaRecorder.stop();
+                isRecording = false;
+                dot.classList.add('hidden');
+                text.innerText = "Record";
+                btn.classList.remove('bg-red-500/40');
+            }
+        }
+
+        function playRecording() {
+            const audio = document.getElementById('audio-playback');
+            if(audioBlobUrl) {
+                audio.play();
+            }
+        }
+
+
+        // --- UI NAVIGATION ---
+        
+        function switchMode(mode) {
+            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard'];
+            
+            // Stop mic/recorder/tone if switching views
+            if(isListening && mode !== 'practice') toggleMic();
+            stopTone();
+
+            views.forEach(v => {
+                const btn = document.getElementById(`btn-${v}`);
+                const view = document.getElementById(`view-${v}`);
+                
+                if (v === mode) {
+                    btn.classList.replace('bg-white/5', 'bg-pink-500/20');
+                    btn.classList.replace('text-pink-200', 'text-white');
+                    view.classList.remove('hidden');
+                    if(v === 'tutorials' || v === 'vocabulary' || v === 'scoreboard') view.classList.add('flex');
+                } else {
+                    btn.classList.replace('bg-pink-500/20', 'bg-white/5');
+                    btn.classList.replace('text-white', 'text-pink-200');
+                    view.classList.add('hidden');
+                    view.classList.remove('flex');
+                }
+            });
+
+            if(mode === 'tutorials') renderTutorialList();
+            if(mode === 'vocabulary') updateCard();
+            if(mode === 'scoreboard') updateScoreboardUI();
+            
+            lucide.createIcons();
+        }
+
+        // --- SCOREBOARD LOGIC ---
+
+        function updateScoreboardUI() {
+            if(!currentUser) return;
+            const list = document.getElementById('score-list');
+            const sessions = currentUser.sessions || [];
+            
+            document.getElementById('stat-sessions').innerText = sessions.length;
+            const bestScore = sessions.length > 0 ? Math.max(...sessions.map(s => s.score)) : 0;
+            document.getElementById('stat-best').innerText = Math.round(bestScore) + "%";
+            const avgHz = sessions.length > 0 ? sessions.reduce((acc, curr) => acc + curr.avgPitch, 0) / sessions.length : 0;
+            document.getElementById('stat-avg').innerText = Math.round(avgHz) + " Hz";
+
+            const sortedSessions = [...sessions].reverse().slice(0, 10);
+            
+            if(sortedSessions.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 py-10 italic">No sessions recorded yet, babe. Start practicing!</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            sortedSessions.forEach(s => {
+                const date = new Date(s.date).toLocaleDateString();
+                const scoreColor = s.score >= 80 ? 'text-pink-400' : (s.score >= 50 ? 'text-purple-400' : 'text-gray-400');
+                const item = document.createElement('div');
+                item.className = "grid grid-cols-12 items-center bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-white/10 transition";
+                item.innerHTML = `
+                    <div class="col-span-6 flex items-center gap-2 md:gap-3">
+                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 text-[10px] md:text-xs font-bold shrink-0">${Math.round(s.score)}</div>
+                        <div class="min-w-0"><div class="text-xs md:text-sm font-bold text-white truncate">${date}</div><div class="text-[8px] md:text-[10px] text-gray-500 truncate">${s.narrative.substring(0, 20)}...</div></div>
+                    </div>
+                    <div class="col-span-3 text-center text-xs md:text-sm text-gray-300 font-mono">${Math.round(s.avgPitch)} Hz</div>
+                    <div class="col-span-3 text-right text-xs md:text-sm font-bold ${scoreColor}">${Math.round(s.score)}%</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // --- SESSION ANALYSIS ---
+
+        function analyzeSession() {
+            const duration = (Date.now() - sessionStartTime) / 1000;
+            if (duration < 3 || sessionData.length < 10) return; 
+
+            const validSamples = sessionData.filter(hz => hz > 70);
+            if (validSamples.length === 0) return;
+
+            const avgPitch = validSamples.reduce((a, b) => a + b, 0) / validSamples.length;
+            const femSamples = validSamples.filter(hz => hz >= 170 && hz <= 255).length;
+            const score = (femSamples / validSamples.length) * 100;
+
+            let narrative = "", title = "";
+            if (score > 85) { title = "Goddess Energy! 💖"; narrative = "Wow! Your voice was consistently bright, feminine, and absolutely stunning. You lived in the high resonance zone effortlessly."; } 
+            else if (score > 60) { title = "Looking Cute ✨"; narrative = "You're getting there, doll! You spent a lot of time in the femme range, but dipped down occasionally. Keep that brightness up!"; } 
+            else if (score > 30) { title = "Warming Up 🌸"; narrative = "Good effort! Your voice is still finding its footing. Focus on keeping your larynx high and your smile wide to avoid dropping into chest voice."; } 
+            else { title = "Deep & Sultry 🖤"; narrative = "You stayed mostly in the lower range today. Remember: Whisper Siren exercises are your best friend to build that upper range strength!"; }
+
+            if (currentUser) {
+                currentUser.sessions.push({ date: new Date().toISOString(), duration: duration, avgPitch: avgPitch, score: score, narrative: title });
+                saveUser();
+            }
+            showReportCard(Math.round(score), Math.round(avgPitch), Math.round(duration), narrative);
+            sessionData = [];
+        }
+
+        function showReportCard(score, avg, time, text) {
+            const modal = document.getElementById('report-modal');
+            modal.classList.remove('hidden');
+            document.getElementById('report-score').innerText = score + "%";
+            document.getElementById('report-avg').innerText = avg + " Hz";
+            document.getElementById('report-time').innerText = time + "s";
+            document.getElementById('report-narrative').innerText = `"${text}"`;
+            
+            const circle = document.getElementById('score-circle');
+            const circumference = 2 * Math.PI * 46; 
+            const offset = circumference - (score / 100) * circumference;
+            circle.style.strokeDashoffset = circumference;
+            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
+        }
+
+        function closeReport() {
+            document.getElementById('report-modal').classList.add('hidden');
+            switchMode('scoreboard'); 
+        }
+
+        // --- AUDIO ENGINE ---
+
+        function autoCorrelate(buffer, sampleRate) {
+            let SIZE = buffer.length;
+            let rms = 0;
+            for (let i = 0; i < SIZE; i++) {
+                const val = buffer[i];
+                rms += val * val;
+            }
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) return -1; 
+
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
+            for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buffer[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+
+            buffer = buffer.slice(r1, r2);
+            SIZE = buffer.length;
+
+            let c = new Array(SIZE).fill(0);
+            for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buffer[j] * buffer[j + i];
+
+            let d = 0; while (c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < SIZE; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+            let T0 = maxpos;
+            let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+            let a = (x1 + x3 - 2 * x2) / 2;
+            let b = (x3 - x1) / 2;
+            if (a) T0 = T0 - b / (2 * a);
+
+            return sampleRate / T0;
+        }
+
+        async function toggleMic() {
+            const btn = document.getElementById('mic-toggle');
+            const prompt = document.getElementById('start-prompt');
+            const feedback = document.getElementById('feedback-text');
+
+            if (isListening) {
+                if (audioContext) audioContext.close();
+                if (microphone) microphone.getTracks().forEach(track => track.stop());
+                cancelAnimationFrame(animationId);
+                isListening = false;
+                if(btn) { btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 md:w-8 md:h-8"></i>'; btn.classList.remove('pulse-ring'); }
+                if(prompt) prompt.style.display = 'flex';
+                if(feedback) { feedback.innerText = "Processing session..."; feedback.className = "text-base md:text-lg font-medium text-gray-500"; }
+                analyzeSession();
+                const needle = document.getElementById('pitch-needle');
+                if(needle) needle.style.left = '0%';
+                const display = document.getElementById('pitch-display');
+                if(display) display.innerText = '0 Hz';
+                
+            } else {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    microphone = stream;
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    isListening = true;
+                    sessionData = [];
+                    sessionStartTime = Date.now();
+                    if(btn) { btn.innerHTML = '<i data-lucide="pause" class="w-6 h-6 md:w-8 md:h-8"></i>'; btn.classList.add('pulse-ring'); }
+                    if(prompt) prompt.style.display = 'none';
+                    if(feedback) { feedback.innerText = "Listening to your beautiful voice..."; feedback.className = "text-base md:text-lg font-medium text-pink-200"; }
+                    
+                    const canvasEl = document.getElementById('audioCanvas');
+                    if(canvasEl && canvasEl.offsetParent !== null) startVisualizer(); else runPitchLoop();
+                    
+                } catch (err) {
+                    console.error(err);
+                    alert("Microphone access needed! Please allow permission.");
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function runPitchLoop() {
+             const bufferLength = analyser.frequencyBinCount;
+             const timeDomainArray = new Float32Array(bufferLength);
+             const loop = () => {
+                 if(!isListening) return;
+                 animationId = requestAnimationFrame(loop);
+                 analyser.getFloatTimeDomainData(timeDomainArray);
+                 const detectedPitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
+                 if (detectedPitch > 70 && detectedPitch < 500) { sessionData.push(detectedPitch); updateUI(detectedPitch); }
+                 const canvasEl = document.getElementById('audioCanvas');
+                 if(canvasEl && canvasEl.offsetParent !== null && !ctx) { cancelAnimationFrame(animationId); startVisualizer(); return; }
+             };
+             loop();
+        }
+
+        function startVisualizer() {
+            canvas = document.getElementById('audioCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = 200;
+            const bufferLength = analyser.frequencyBinCount;
+            const timeDomainArray = new Float32Array(bufferLength);
+            let currentPitch = 0;
+            const draw = () => {
+                if (!isListening) return;
+                if(canvas.offsetParent === null) { ctx = null; runPitchLoop(); return; }
+                animationId = requestAnimationFrame(draw);
+                analyser.getFloatTimeDomainData(timeDomainArray);
+                const detectedPitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
+                if (detectedPitch > 70 && detectedPitch < 500) { currentPitch = currentPitch * 0.8 + detectedPitch * 0.2; sessionData.push(detectedPitch); updateUI(currentPitch); }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#ec4899'); gradient.addColorStop(0.5, '#a855f7'); gradient.addColorStop(1, '#ec4899');
+                ctx.lineWidth = 3; ctx.strokeStyle = gradient; ctx.lineCap = 'round'; ctx.shadowBlur = 15; ctx.shadowColor = '#ec4899';
+                ctx.beginPath();
+                const sliceWidth = canvas.width * 1.0 / bufferLength;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i += 4) {
+                    const v = timeDomainArray[i] * 5; 
+                    const y = canvas.height / 2 + v * (canvas.height / 2);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    x += sliceWidth * 4;
+                }
+                ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
+            };
+            draw();
+        }
+
+        function updateUI(hz) {
+            const display = document.getElementById('pitch-display');
+            if(display) {
+                display.innerText = Math.round(hz) + ' Hz';
+                if (hz > 170 && hz < 240) display.className = "px-2 py-0.5 rounded text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30";
+                else display.className = "px-2 py-0.5 rounded text-xs font-bold bg-gray-500/20 text-gray-300 border border-gray-500/30";
+            }
+            const needle = document.getElementById('pitch-needle');
+            if(needle) { const percentage = Math.min(Math.max((hz - 80) / (320) * 100, 0), 100); needle.style.left = percentage + '%'; }
+            const feedback = document.getElementById('feedback-text');
+            if(feedback) {
+                if (hz < 145) feedback.innerText = "Deep & Sultry (Masc Range) 🖤";
+                else if (hz >= 145 && hz < 175) feedback.innerText = "Androgynous Zone ✨";
+                else if (hz >= 175 && hz < 240) feedback.innerText = "Perfect Fem Resonance! 💖";
+                else if (hz >= 240) feedback.innerText = "High & Cute! 🎀";
+            }
+        }
+        
+        function updateCard() {
+            const wordData = WORD_BANK[currentWordIndex];
+            document.getElementById('card-word').innerText = wordData.word;
+            document.getElementById('card-category').innerText = wordData.category;
+            document.getElementById('card-tip').innerText = `"${wordData.tip}"`;
+        }
+
+        function changeWord(direction) {
+            currentWordIndex += direction;
+            if (currentWordIndex < 0) currentWordIndex = WORD_BANK.length - 1;
+            if (currentWordIndex >= WORD_BANK.length) currentWordIndex = 0;
+            updateCard();
+        }
+        
+        function renderTutorialList() {
+            const list = document.getElementById('tutorial-list');
+            list.innerHTML = '';
+            TUTORIALS.forEach(tut => {
+                const item = document.createElement('div');
+                item.className = "glass-panel p-4 md:p-6 rounded-3xl hover:bg-white/5 transition cursor-pointer group";
+                item.onclick = () => openTutorial(tut);
+                item.innerHTML = `<div class="flex justify-between items-center"><div><span class="text-xs text-pink-400 font-bold tracking-wider uppercase mb-1 block">${tut.level}</span><h3 class="text-lg md:text-xl font-bold text-white mb-1 group-hover:text-pink-300 transition">${tut.title}</h3><p class="text-xs md:text-sm text-gray-400 line-clamp-2">${tut.description}</p></div><div class="bg-pink-500/20 p-2 md:p-3 rounded-full group-hover:bg-pink-500 group-hover:text-white transition text-pink-500 ml-4 shrink-0"><i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i></div></div>`;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function openTutorial(tut) {
+            document.getElementById('tutorial-list').classList.add('hidden');
+            const detail = document.getElementById('tutorial-detail');
+            detail.classList.remove('hidden');
+            document.getElementById('tut-title').innerText = tut.title;
+            document.getElementById('tut-desc').innerText = tut.description;
+            const stepsContainer = document.getElementById('tut-steps');
+            stepsContainer.innerHTML = '';
+            tut.steps.forEach((step, idx) => { stepsContainer.innerHTML += `<div class="flex gap-3 md:gap-4"><div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 border border-pink-500/50 flex items-center justify-center text-pink-300 text-sm md:text-base font-bold shrink-0">${idx + 1}</div><p class="text-sm md:text-lg text-gray-200 pt-0.5">${step}</p></div>`; });
+        }
+
+        function closeTutorial() {
+            document.getElementById('tutorial-detail').classList.add('hidden');
+            document.getElementById('tutorial-list').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
