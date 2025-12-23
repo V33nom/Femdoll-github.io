@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FemVoice Doll</title>
     
+    <link rel="manifest" href="manifest.json"> <!-- ADD THIS LINE -->
+    
     <!-- Tailwind CSS (via CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Lucide Icons (via CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js (via CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -64,6 +69,30 @@
         .chat-bubble.fem { border-left: 4px solid #ec4899; }
         .chat-bubble.masc { border-left: 4px solid #6b7280; }
         .chat-bubble.andro { border-left: 4px solid #a855f7; }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ec4899;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 0 10px rgba(236,72,153,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[#0f0518] text-white selection:bg-pink-500 selection:text-white overflow-x-hidden">
@@ -75,12 +104,11 @@
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
     </div>
 
-    <!-- Login Modal (Overlay) -->
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden p-4">
         <div class="glass-panel p-8 rounded-3xl max-w-md w-full text-center relative overflow-hidden border-pink-500/30 max-h-[90vh] overflow-y-auto">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
             <div class="mb-6">
-                <!-- Fallback to icon if image missing, user instructed to add logo.png -->
                 <img src="logo.png" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=FemVoice'" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-pink-500/30 object-cover shadow-[0_0_20px_rgba(236,72,153,0.4)]">
                 <h2 class="text-3xl font-bold text-white mb-2">Dollhouse Registry</h2>
                 <p class="text-pink-200/70 text-sm">Enter your femme name to begin your transformation.</p>
@@ -132,12 +160,10 @@
         <!-- Header -->
         <header class="flex justify-between items-center mb-6 md:mb-12">
             <div class="flex items-center gap-4">
-                <!-- UPDATED LOGO: Uses 'logo.png' -->
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     <img src="logo.png" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=FemVoice'" alt="FemVoice Doll Logo" class="relative w-16 h-16 rounded-xl object-cover border-2 border-[#1a1025] shadow-2xl">
                 </div>
-                
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-200 to-pink-400 leading-tight">
                         FemVoice <span class="font-light italic block md:inline">Doll</span>
@@ -169,13 +195,15 @@
                         <h2 class="text-xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
                             <i data-lucide="crown" class="w-5 h-5 text-yellow-400"></i> Dashboard
                         </h2>
-                        <!-- Responsive Grid for buttons on mobile -->
                         <div class="grid grid-cols-2 md:flex md:flex-col gap-3">
                             <button onclick="switchMode('practice')" id="btn-practice" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-pink-500/20 text-white font-medium text-sm md:text-base">
                                 <i data-lucide="mic" class="w-4 h-4 shrink-0"></i> <span>Practice</span>
                             </button>
                             <button onclick="switchMode('talk')" id="btn-talk" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
                                 <i data-lucide="message-circle" class="w-4 h-4 shrink-0"></i> <span>Talk & Train</span>
+                            </button>
+                            <button onclick="switchMode('reading')" id="btn-reading" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="book" class="w-4 h-4 shrink-0"></i> <span>Reading</span>
                             </button>
                             <button onclick="switchMode('tutorials')" id="btn-tutorials" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
                                 <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i> <span>Training</span>
@@ -186,10 +214,12 @@
                             <button onclick="switchMode('scoreboard')" id="btn-scoreboard" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
                                 <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i> <span>Scores</span>
                             </button>
+                            <button onclick="switchMode('settings')" id="btn-settings" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base">
+                                <i data-lucide="settings" class="w-4 h-4 shrink-0"></i> <span>Settings</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Breathing Circle -->
                     <div class="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/10 flex items-center gap-4 justify-center md:justify-start">
                         <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center relative shrink-0">
                              <div class="absolute inset-0 bg-pink-500/40 rounded-full breathing-circle"></div>
@@ -221,11 +251,19 @@
 
                     <!-- Visualizer Card -->
                     <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden flex flex-col items-center justify-center border-pink-500/20 shadow-pink-900/20 min-h-[280px] md:min-h-[320px]">
-                        <div class="absolute top-4 left-4 flex gap-2">
+                        <div class="absolute top-4 left-4 flex gap-2 z-30">
                             <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
                             <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                             <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
                         </div>
+                        
+                        <!-- Visualizer Toggle -->
+                        <div class="absolute top-4 right-4 z-30">
+                            <button onclick="toggleVisualizerMode()" class="px-3 py-1 bg-black/40 rounded-full border border-white/10 text-[10px] text-pink-300 hover:bg-white/10 transition uppercase tracking-widest font-bold">
+                                Switch to <span id="vis-mode-label">Aura</span>
+                            </button>
+                        </div>
+
                         <div class="w-full h-40 md:h-48 flex items-center justify-center relative">
                             <canvas id="audioCanvas" class="w-full h-full opacity-80"></canvas>
                             <div id="start-prompt" class="absolute inset-0 flex items-center justify-center flex-col text-center animate-pulse pointer-events-none">
@@ -255,7 +293,8 @@
                         <div class="relative h-20 md:h-24 flex items-end justify-between gap-1 px-2 border-b border-white/5 pb-2">
                             <div class="absolute left-0 bottom-0 text-[10px] text-gray-500">80Hz</div>
                             <div class="absolute right-0 bottom-0 text-[10px] text-gray-500">400Hz</div>
-                            <div class="absolute bottom-0 h-full bg-pink-500/10 border-x border-pink-500/20" style="left: 30%; width: 25%;">
+                            <!-- Dynamic Target Zone -->
+                            <div id="target-zone-visual" class="absolute bottom-0 h-full bg-pink-500/10 border-x border-pink-500/20 transition-all duration-300" style="left: 30%; width: 25%;">
                                 <div class="absolute top-2 w-full text-center text-[10px] text-pink-500 font-bold tracking-widest opacity-50">GOAL</div>
                             </div>
                             <div id="pitch-needle" class="absolute bottom-0 w-1 bg-white h-full transition-all duration-200 shadow-[0_0_10px_white] z-10 left-0">
@@ -265,7 +304,7 @@
                         <p class="text-xs text-gray-400 mt-2 text-center">Aim for the pink zone!</p>
                     </div>
 
-                    <!-- Audio Recorder (Vanity Mirror) -->
+                    <!-- Audio Recorder -->
                     <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-pink-300 font-bold flex items-center gap-2">
@@ -288,10 +327,9 @@
                     </div>
                 </div>
 
-                <!-- VIEW: TALK TO TRAIN (NEW) -->
+                <!-- VIEW: TALK TO TRAIN -->
                 <div id="view-talk" class="view-section hidden fade-in flex-col gap-6 h-full">
                      <div class="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[500px] flex flex-col">
-                        <!-- Header -->
                         <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
                             <div>
                                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">
@@ -303,15 +341,11 @@
                                 <i data-lucide="mic" class="w-4 h-4"></i> Start Talking
                             </button>
                         </div>
-
-                        <!-- Chat Area -->
                         <div id="talk-log" class="flex-grow overflow-y-auto space-y-4 mb-4 pr-2 max-h-[400px]">
                             <div class="text-center text-gray-500 py-10 italic" id="talk-placeholder">
                                 Press start and say anything! <br> "Hello, how are you today?"
                             </div>
                         </div>
-                        
-                        <!-- Status Bar -->
                         <div class="mt-auto pt-4 border-t border-white/10 flex justify-between items-center text-xs text-gray-500">
                              <div class="flex items-center gap-2">
                                  <div id="talk-status-dot" class="w-2 h-2 rounded-full bg-gray-500"></div>
@@ -320,6 +354,31 @@
                              <div>Listening for phrases...</div>
                         </div>
                      </div>
+                </div>
+
+                <!-- VIEW: READING ROOM (NEW) -->
+                <div id="view-reading" class="view-section hidden fade-in flex-col gap-6 h-full">
+                    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[500px] flex flex-col">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                             <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                                 <i data-lucide="book" class="w-6 h-6 text-pink-400"></i> Reading Room
+                             </h2>
+                             <div class="flex gap-2">
+                                 <button onclick="scrollText()" id="scroll-btn" class="p-2 rounded-lg bg-pink-500/20 text-pink-300 hover:bg-pink-500/40 transition">
+                                     <i data-lucide="play" class="w-5 h-5"></i>
+                                 </button>
+                             </div>
+                        </div>
+                        <div class="relative flex-grow bg-black/20 rounded-xl p-6 overflow-hidden border border-white/5">
+                            <div id="teleprompter" class="text-xl md:text-2xl leading-relaxed text-gray-300 font-serif text-center transition-transform duration-[50ms]">
+                                <p class="mb-8 font-bold text-pink-400">The Rainbow Passage</p>
+                                <p>When the sunlight strikes raindrops in the air, they act like a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow.</p>
+                                <p class="mt-8">Throughout the centuries men have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods. The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain. The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky.</p>
+                            </div>
+                            <div class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#130820] to-transparent pointer-events-none"></div>
+                            <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#130820] to-transparent pointer-events-none"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- VIEW: TUTORIALS -->
@@ -371,18 +430,25 @@
                     </div>
                 </div>
 
-                <!-- VIEW: SCOREBOARD -->
+                <!-- VIEW: SCOREBOARD (UPDATED WITH CHART) -->
                 <div id="view-scoreboard" class="view-section hidden fade-in flex-col gap-6">
                     <div class="glass-panel rounded-3xl p-4 md:p-8 relative overflow-hidden min-h-[500px]">
-                        <div class="flex items-center gap-4 mb-8">
+                        <div class="flex items-center gap-4 mb-6">
                             <div class="p-3 bg-pink-500/20 rounded-xl text-pink-400">
                                 <i data-lucide="trophy" class="w-8 h-8"></i>
                             </div>
                             <div>
                                 <h2 class="text-2xl font-bold text-white">Glitter Board</h2>
-                                <p class="text-sm text-gray-400">Your most stunning performances.</p>
+                                <p class="text-sm text-gray-400">Your journey to goddess.</p>
                             </div>
                         </div>
+
+                        <!-- Glow Up Timeline -->
+                        <div class="mb-8 h-48 w-full bg-black/20 rounded-xl p-2 border border-white/5">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+
+                        <!-- Stats -->
                         <div class="grid grid-cols-3 gap-2 md:gap-4 mb-8">
                             <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
                                 <div id="stat-sessions" class="text-xl md:text-2xl font-bold text-white mb-1">0</div>
@@ -404,6 +470,39 @@
                         </div>
                         <div id="score-list" class="space-y-3">
                             <div class="text-center text-gray-500 py-10 italic">No sessions recorded yet, babe. Start practicing!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SETTINGS (NEW) -->
+                <div id="view-settings" class="view-section hidden fade-in flex-col gap-6 h-full">
+                    <div class="glass-panel rounded-3xl p-8 relative overflow-hidden min-h-[400px]">
+                        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                             <i data-lucide="settings" class="w-6 h-6 text-pink-400"></i> Doll Settings
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-pink-300 font-bold text-sm">Target Range Start (Hz)</label>
+                                    <span id="val-min" class="text-white font-mono">175 Hz</span>
+                                </div>
+                                <input type="range" id="setting-min" min="100" max="200" value="175" oninput="updateSettingsUI()">
+                                <p class="text-xs text-gray-400 mt-2">Adjust this if your natural voice is deeper. Default is 175Hz.</p>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-pink-300 font-bold text-sm">Target Range End (Hz)</label>
+                                    <span id="val-max" class="text-white font-mono">240 Hz</span>
+                                </div>
+                                <input type="range" id="setting-max" min="200" max="300" value="240" oninput="updateSettingsUI()">
+                                <p class="text-xs text-gray-400 mt-2">The upper limit of your comfortable speaking voice.</p>
+                            </div>
+
+                            <button onclick="saveSettings()" class="w-full py-4 rounded-xl bg-pink-500 text-white font-bold shadow-lg hover:bg-pink-600 transition mt-4">
+                                Save Calibration
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -434,7 +533,7 @@
             { word: "Wonderful", category: "Melody", tip: "Start high, dip low, end middle." }
         ];
 
-        // --- STATE & AUDIO ---
+        // --- STATE ---
         let audioContext = null;
         let analyser = null;
         let microphone = null;
@@ -442,41 +541,51 @@
         let isListening = false;
         let canvas, ctx;
         let currentWordIndex = 0;
+        let userSettings = { minHz: 175, maxHz: 240 };
+        let visualizerMode = 'wave'; // 'wave' or 'aura'
         
-        // Session Recording
         let sessionData = [];
         let sessionStartTime = 0;
         let currentUser = null;
+        let progressChart = null;
 
-        // Vanity Recorder State
+        // Vanity Recorder
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
         let audioBlobUrl = null;
 
-        // Tone Generator State
+        // Tone
         let oscillator = null;
         let gainNode = null;
         
-        // Talk & Train State
+        // Talk
         let recognition = null;
         let isTalking = false;
-        let talkPitchData = []; // Accumulates pitch per phrase
+        let talkPitchData = [];
+        
+        // Reading
+        let isScrolling = false;
+        let scrollInterval = null;
 
-        // --- AUTH & LOCAL STORAGE ---
-
+        // --- INIT ---
         window.onload = () => {
             lucide.createIcons();
             checkAuth();
-            window.addEventListener('resize', () => {
-                const canvasEl = document.getElementById('audioCanvas');
-                if(canvasEl && canvasEl.offsetParent !== null) {
-                    canvasEl.width = canvasEl.parentElement.offsetWidth;
-                    canvasEl.height = 200;
-                }
-            });
+            loadSettings();
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
         };
 
+        function resizeCanvas() {
+            const canvasEl = document.getElementById('audioCanvas');
+            if(canvasEl && canvasEl.offsetParent !== null) {
+                canvasEl.width = canvasEl.parentElement.offsetWidth;
+                canvasEl.height = 200;
+            }
+        }
+
+        // --- AUTH & SETTINGS ---
         function checkAuth() {
             const storedUser = localStorage.getItem('femvoice_user');
             if (storedUser) {
@@ -492,11 +601,7 @@
             const input = document.getElementById('username-input');
             const name = input.value.trim();
             if (name) {
-                currentUser = {
-                    name: name,
-                    sessions: [],
-                    joined: new Date().toISOString()
-                };
+                currentUser = { name: name, sessions: [], joined: new Date().toISOString() };
                 saveUser();
                 updateUserDisplay();
                 document.getElementById('login-modal').classList.add('hidden');
@@ -504,15 +609,10 @@
         }
 
         function logout() {
-            if(confirm("Are you sure you want to log out, doll?")) {
-                localStorage.removeItem('femvoice_user');
-                location.reload();
-            }
+            if(confirm("Log out?")) { localStorage.removeItem('femvoice_user'); location.reload(); }
         }
 
-        function saveUser() {
-            localStorage.setItem('femvoice_user', JSON.stringify(currentUser));
-        }
+        function saveUser() { localStorage.setItem('femvoice_user', JSON.stringify(currentUser)); }
 
         function updateUserDisplay() {
             if(currentUser) {
@@ -522,228 +622,57 @@
             }
         }
 
-        // --- NEW FEATURES ---
-
-        // 1. Text to Speech
-        function speakWord() {
-            const word = WORD_BANK[currentWordIndex].word;
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.pitch = 1.2; 
-                utterance.rate = 0.9;  
-                const voices = window.speechSynthesis.getVoices();
-                const femVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google US English'));
-                if(femVoice) utterance.voice = femVoice;
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("Sorry, your browser doesn't support Text-to-Speech!");
-            }
+        function loadSettings() {
+            const s = localStorage.getItem('femvoice_settings');
+            if(s) userSettings = JSON.parse(s);
+            updateSettingsUI();
+            updateTargetVisuals();
         }
 
-        // 2. Reference Tones
-        function playTone(freq) {
-            stopTone(); 
-            const ToneCtx = new (window.AudioContext || window.webkitAudioContext)();
-            oscillator = ToneCtx.createOscillator();
-            gainNode = ToneCtx.createGain();
-            oscillator.type = 'sine';
-            oscillator.frequency.value = freq;
-            gainNode.gain.setValueAtTime(0.1, ToneCtx.currentTime); 
-            oscillator.connect(gainNode);
-            gainNode.connect(ToneCtx.destination);
-            oscillator.start();
-        }
-
-        function stopTone() {
-            if (oscillator) { oscillator.stop(); oscillator.disconnect(); oscillator = null; }
-            if(gainNode) { gainNode.disconnect(); gainNode = null; }
-        }
-
-        // 3. Audio Recorder (Vanity Mirror)
-        async function toggleRecording() {
-            const btn = document.getElementById('record-btn');
-            const dot = document.getElementById('record-dot');
-            const text = document.getElementById('record-text');
-            const playBtn = document.getElementById('play-btn');
-
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        audioBlobUrl = URL.createObjectURL(audioBlob);
-                        const audio = document.getElementById('audio-playback');
-                        audio.src = audioBlobUrl;
-                        playBtn.classList.replace('text-gray-500', 'text-white');
-                        playBtn.classList.replace('bg-white/5', 'bg-green-500/20');
-                        playBtn.classList.replace('border-white/5', 'border-green-500/30');
-                        playBtn.disabled = false;
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    mediaRecorder.start();
-                    isRecording = true;
-                    dot.classList.remove('hidden');
-                    text.innerText = "Stop";
-                    btn.classList.add('bg-red-500/40');
-                    playBtn.disabled = true;
-                } catch(e) { console.error(e); alert("Mic access needed to record."); }
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                dot.classList.add('hidden');
-                text.innerText = "Record";
-                btn.classList.remove('bg-red-500/40');
-            }
-        }
-
-        function playRecording() {
-            const audio = document.getElementById('audio-playback');
-            if(audioBlobUrl) { audio.play(); }
-        }
-
-        // 4. TALK TO TRAIN (Web Speech API)
-        function toggleTalkMode() {
-            const btn = document.getElementById('talk-btn');
-            const statusDot = document.getElementById('talk-status-dot');
-            const statusText = document.getElementById('talk-status-text');
-
-            if(isTalking) {
-                // STOP
-                if(recognition) recognition.stop();
-                if(audioContext) audioContext.close();
-                if(microphone) microphone.getTracks().forEach(track => track.stop());
-                cancelAnimationFrame(animationId);
-                
-                isTalking = false;
-                btn.classList.replace('bg-gray-500', 'bg-pink-500');
-                btn.innerHTML = '<i data-lucide="mic" class="w-4 h-4"></i> Start Talking';
-                statusDot.classList.replace('bg-green-500', 'bg-gray-500');
-                statusDot.classList.remove('animate-pulse');
-                statusText.innerText = "Ready";
-                
-            } else {
-                // START
-                // 1. Start Speech Recognition
-                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                    alert("Your browser does not support Speech Recognition. Try Chrome or Edge!");
-                    return;
-                }
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
-
-                recognition.onstart = () => {
-                     document.getElementById('talk-placeholder').style.display = 'none';
-                     statusDot.classList.replace('bg-gray-500', 'bg-green-500');
-                     statusDot.classList.add('animate-pulse');
-                     statusText.innerText = "Listening...";
-                };
-
-                recognition.onresult = (event) => {
-                    const transcript = event.results[event.results.length - 1][0].transcript;
-                    analyzePhrase(transcript);
-                    talkPitchData = []; // Reset for next phrase
-                };
-
-                recognition.onerror = (event) => {
-                    console.error("Speech error", event.error);
-                    toggleTalkMode(); // Stop on error
-                };
-
-                recognition.start();
-
-                // 2. Start Audio Analysis (Pitch Tracking) in background
-                startBackgroundPitchTracker();
-                
-                isTalking = true;
-                btn.classList.replace('bg-pink-500', 'bg-gray-500');
-                btn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i> Stop';
-            }
-        }
-
-        async function startBackgroundPitchTracker() {
-             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                microphone = stream;
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-                const source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
-
-                const bufferLength = analyser.frequencyBinCount;
-                const timeDomainArray = new Float32Array(bufferLength);
-                
-                const loop = () => {
-                    if(!isTalking) return;
-                    animationId = requestAnimationFrame(loop);
-                    analyser.getFloatTimeDomainData(timeDomainArray);
-                    const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
-                    if(pitch > 70 && pitch < 500) {
-                        talkPitchData.push(pitch);
-                    }
-                };
-                loop();
-
-             } catch(e) {
-                 console.error(e);
-             }
-        }
-
-        function analyzePhrase(text) {
-            const log = document.getElementById('talk-log');
+        function updateSettingsUI() {
+            const minEl = document.getElementById('setting-min');
+            const maxEl = document.getElementById('setting-max');
             
-            // Calculate Average Pitch for this phrase
-            let avgPitch = 0;
-            let feedback = "No audio detected";
-            let type = "masc"; // default style
-
-            if(talkPitchData.length > 0) {
-                avgPitch = Math.round(talkPitchData.reduce((a, b) => a + b, 0) / talkPitchData.length);
-                
-                if(avgPitch > 175 && avgPitch < 250) {
-                    feedback = "Excellent! Perfect feminine range.";
-                    type = "fem";
-                } else if (avgPitch >= 145 && avgPitch <= 175) {
-                    feedback = "Good, aiming for androgynous.";
-                    type = "andro";
-                } else if (avgPitch < 145) {
-                    feedback = "A bit deep. Try raising your larynx.";
-                    type = "masc";
-                } else {
-                    feedback = "Very high! Be careful of strain.";
-                    type = "fem";
-                }
+            // If called from loadSettings, set inputs
+            if(document.activeElement !== minEl && document.activeElement !== maxEl) {
+                minEl.value = userSettings.minHz;
+                maxEl.value = userSettings.maxHz;
             }
 
-            const bubble = document.createElement('div');
-            bubble.className = `chat-bubble ${type} fade-in`;
-            bubble.innerHTML = `
-                <div class="font-bold text-white mb-1">"${text}"</div>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-pink-300 font-mono">${avgPitch > 0 ? avgPitch + ' Hz' : '--'}</span>
-                    <span class="text-gray-400 italic">${feedback}</span>
-                </div>
-            `;
-            
-            log.appendChild(bubble);
-            log.scrollTop = log.scrollHeight;
+            document.getElementById('val-min').innerText = minEl.value + " Hz";
+            document.getElementById('val-max').innerText = maxEl.value + " Hz";
         }
 
+        function saveSettings() {
+            userSettings.minHz = parseInt(document.getElementById('setting-min').value);
+            userSettings.maxHz = parseInt(document.getElementById('setting-max').value);
+            localStorage.setItem('femvoice_settings', JSON.stringify(userSettings));
+            updateTargetVisuals();
+            alert("Settings saved, doll! 💖");
+            switchMode('practice');
+        }
 
-        // --- UI NAVIGATION ---
-        
+        function updateTargetVisuals() {
+            // Update Practice View Gauge
+            const range = 400 - 80; // Total gauge range
+            const startPct = ((userSettings.minHz - 80) / range) * 100;
+            const widthPct = ((userSettings.maxHz - userSettings.minHz) / range) * 100;
+            
+            const zone = document.getElementById('target-zone-visual');
+            if(zone) {
+                zone.style.left = startPct + "%";
+                zone.style.width = widthPct + "%";
+            }
+        }
+
+        // --- NAVIGATION ---
         function switchMode(mode) {
-            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard', 'talk'];
+            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard', 'talk', 'settings', 'reading'];
             
-            // Cleanup previous modes
+            // Clean up
             if(isListening && mode !== 'practice') toggleMic();
             if(isTalking && mode !== 'talk') toggleTalkMode();
+            if(isScrolling) scrollText(); // Stop scroll
             stopTone();
 
             views.forEach(v => {
@@ -751,13 +680,17 @@
                 const view = document.getElementById(`view-${v}`);
                 
                 if (v === mode) {
-                    btn.classList.replace('bg-white/5', 'bg-pink-500/20');
-                    btn.classList.replace('text-pink-200', 'text-white');
+                    if(btn) {
+                        btn.classList.replace('bg-white/5', 'bg-pink-500/20');
+                        btn.classList.replace('text-pink-200', 'text-white');
+                    }
                     view.classList.remove('hidden');
-                    if(v === 'tutorials' || v === 'vocabulary' || v === 'scoreboard' || v === 'talk') view.classList.add('flex');
+                    if(v !== 'practice') view.classList.add('flex');
                 } else {
-                    btn.classList.replace('bg-pink-500/20', 'bg-white/5');
-                    btn.classList.replace('text-white', 'text-pink-200');
+                    if(btn) {
+                        btn.classList.replace('bg-pink-500/20', 'bg-white/5');
+                        btn.classList.replace('text-white', 'text-pink-200');
+                    }
                     view.classList.add('hidden');
                     view.classList.remove('flex');
                 }
@@ -767,11 +700,42 @@
             if(mode === 'vocabulary') updateCard();
             if(mode === 'scoreboard') updateScoreboardUI();
             
+            if(mode === 'practice') {
+                 setTimeout(resizeCanvas, 100);
+            }
+
             lucide.createIcons();
         }
 
-        // --- SCOREBOARD LOGIC ---
+        // --- READING ROOM ---
+        function scrollText() {
+            const btn = document.getElementById('scroll-btn');
+            const box = document.getElementById('teleprompter');
+            
+            if(isScrolling) {
+                clearInterval(scrollInterval);
+                isScrolling = false;
+                btn.innerHTML = '<i data-lucide="play" class="w-5 h-5"></i>';
+                btn.classList.replace('bg-pink-500/40', 'bg-pink-500/20');
+            } else {
+                isScrolling = true;
+                btn.innerHTML = '<i data-lucide="pause" class="w-5 h-5"></i>';
+                btn.classList.replace('bg-pink-500/20', 'bg-pink-500/40');
+                
+                let y = 0;
+                scrollInterval = setInterval(() => {
+                    y -= 0.5;
+                    box.style.transform = `translateY(${y}px)`;
+                    // Loop reset roughly
+                    if(Math.abs(y) > box.scrollHeight - 200) {
+                         y = 300; // Loop back to topish
+                    }
+                }, 20);
+            }
+            lucide.createIcons();
+        }
 
+        // --- SCOREBOARD & CHART ---
         function updateScoreboardUI() {
             if(!currentUser) return;
             const list = document.getElementById('score-list');
@@ -783,15 +747,10 @@
             const avgHz = sessions.length > 0 ? sessions.reduce((acc, curr) => acc + curr.avgPitch, 0) / sessions.length : 0;
             document.getElementById('stat-avg').innerText = Math.round(avgHz) + " Hz";
 
-            const sortedSessions = [...sessions].reverse().slice(0, 10);
-            
-            if(sortedSessions.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 py-10 italic">No sessions recorded yet, babe. Start practicing!</div>';
-                return;
-            }
+            const sorted = [...sessions].reverse().slice(0, 10);
+            list.innerHTML = sorted.length ? '' : '<div class="text-center text-gray-500 py-10 italic">No sessions recorded yet.</div>';
 
-            list.innerHTML = '';
-            sortedSessions.forEach(s => {
+            sorted.forEach(s => {
                 const date = new Date(s.date).toLocaleDateString();
                 const scoreColor = s.score >= 80 ? 'text-pink-400' : (s.score >= 50 ? 'text-purple-400' : 'text-gray-400');
                 const item = document.createElement('div');
@@ -806,56 +765,63 @@
                 `;
                 list.appendChild(item);
             });
+
+            // Init Chart
+            initChart(sessions);
         }
 
-        // --- SESSION ANALYSIS ---
-
-        function analyzeSession() {
-            const duration = (Date.now() - sessionStartTime) / 1000;
-            if (duration < 3 || sessionData.length < 10) return; 
-
-            const validSamples = sessionData.filter(hz => hz > 70);
-            if (validSamples.length === 0) return;
-
-            const avgPitch = validSamples.reduce((a, b) => a + b, 0) / validSamples.length;
-            const femSamples = validSamples.filter(hz => hz >= 170 && hz <= 255).length;
-            const score = (femSamples / validSamples.length) * 100;
-
-            let narrative = "", title = "";
-            if (score > 85) { title = "Goddess Energy! 💖"; narrative = "Wow! Your voice was consistently bright, feminine, and absolutely stunning. You lived in the high resonance zone effortlessly."; } 
-            else if (score > 60) { title = "Looking Cute ✨"; narrative = "You're getting there, doll! You spent a lot of time in the femme range, but dipped down occasionally. Keep that brightness up!"; } 
-            else if (score > 30) { title = "Warming Up 🌸"; narrative = "Good effort! Your voice is still finding its footing. Focus on keeping your larynx high and your smile wide to avoid dropping into chest voice."; } 
-            else { title = "Deep & Sultry 🖤"; narrative = "You stayed mostly in the lower range today. Remember: Whisper Siren exercises are your best friend to build that upper range strength!"; }
-
-            if (currentUser) {
-                currentUser.sessions.push({ date: new Date().toISOString(), duration: duration, avgPitch: avgPitch, score: score, narrative: title });
-                saveUser();
-            }
-            showReportCard(Math.round(score), Math.round(avgPitch), Math.round(duration), narrative);
-            sessionData = [];
-        }
-
-        function showReportCard(score, avg, time, text) {
-            const modal = document.getElementById('report-modal');
-            modal.classList.remove('hidden');
-            document.getElementById('report-score').innerText = score + "%";
-            document.getElementById('report-avg').innerText = avg + " Hz";
-            document.getElementById('report-time').innerText = time + "s";
-            document.getElementById('report-narrative').innerText = `"${text}"`;
+        function initChart(sessions) {
+            const ctx = document.getElementById('progressChart');
+            if(progressChart) progressChart.destroy();
             
-            const circle = document.getElementById('score-circle');
-            const circumference = 2 * Math.PI * 46; 
-            const offset = circumference - (score / 100) * circumference;
-            circle.style.strokeDashoffset = circumference;
-            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
-        }
+            // Get last 10 sessions chronologically
+            const data = [...sessions].slice(-10);
 
-        function closeReport() {
-            document.getElementById('report-modal').classList.add('hidden');
-            switchMode('scoreboard'); 
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(s => new Date(s.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})),
+                    datasets: [{
+                        label: 'Average Pitch (Hz)',
+                        data: data.map(s => s.avgPitch),
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: false, 
+                            min: 100, 
+                            max: 300,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: {size: 10} }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#1f2937', titleColor: '#fff', bodyColor: '#fff' }
+                    }
+                }
+            });
         }
 
         // --- AUDIO ENGINE ---
+
+        // Visualizer Mode
+        function toggleVisualizerMode() {
+            visualizerMode = visualizerMode === 'wave' ? 'aura' : 'wave';
+            document.getElementById('vis-mode-label').innerText = visualizerMode === 'wave' ? 'Aura' : 'Wave';
+        }
 
         function autoCorrelate(buffer, sampleRate) {
             let SIZE = buffer.length;
@@ -903,10 +869,8 @@
                 if(prompt) prompt.style.display = 'flex';
                 if(feedback) { feedback.innerText = "Processing session..."; feedback.className = "text-base md:text-lg font-medium text-gray-500"; }
                 analyzeSession();
-                const needle = document.getElementById('pitch-needle');
-                if(needle) needle.style.left = '0%';
-                const display = document.getElementById('pitch-display');
-                if(display) display.innerText = '0 Hz';
+                document.getElementById('pitch-needle').style.left = '0%';
+                document.getElementById('pitch-display').innerText = '0 Hz';
                 
             } else {
                 try {
@@ -924,8 +888,7 @@
                     if(prompt) prompt.style.display = 'none';
                     if(feedback) { feedback.innerText = "Listening to your beautiful voice..."; feedback.className = "text-base md:text-lg font-medium text-pink-200"; }
                     
-                    const canvasEl = document.getElementById('audioCanvas');
-                    if(canvasEl && canvasEl.offsetParent !== null) startVisualizer(); else runPitchLoop();
+                    if(document.getElementById('audioCanvas').offsetParent !== null) startVisualizer(); else runPitchLoop();
                     
                 } catch (err) {
                     console.error(err);
@@ -944,8 +907,7 @@
                  analyser.getFloatTimeDomainData(timeDomainArray);
                  const detectedPitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
                  if (detectedPitch > 70 && detectedPitch < 500) { sessionData.push(detectedPitch); updateUI(detectedPitch); }
-                 const canvasEl = document.getElementById('audioCanvas');
-                 if(canvasEl && canvasEl.offsetParent !== null && !ctx) { cancelAnimationFrame(animationId); startVisualizer(); return; }
+                 if(document.getElementById('audioCanvas').offsetParent !== null && !ctx) { cancelAnimationFrame(animationId); startVisualizer(); return; }
              };
              loop();
         }
@@ -953,32 +915,72 @@
         function startVisualizer() {
             canvas = document.getElementById('audioCanvas');
             ctx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.offsetWidth;
-            canvas.height = 200;
             const bufferLength = analyser.frequencyBinCount;
             const timeDomainArray = new Float32Array(bufferLength);
+            const freqArray = new Uint8Array(bufferLength); // For Aura mode
             let currentPitch = 0;
+
             const draw = () => {
                 if (!isListening) return;
                 if(canvas.offsetParent === null) { ctx = null; runPitchLoop(); return; }
                 animationId = requestAnimationFrame(draw);
+                
+                // Pitch Data
                 analyser.getFloatTimeDomainData(timeDomainArray);
                 const detectedPitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
-                if (detectedPitch > 70 && detectedPitch < 500) { currentPitch = currentPitch * 0.8 + detectedPitch * 0.2; sessionData.push(detectedPitch); updateUI(currentPitch); }
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                gradient.addColorStop(0, '#ec4899'); gradient.addColorStop(0.5, '#a855f7'); gradient.addColorStop(1, '#ec4899');
-                ctx.lineWidth = 3; ctx.strokeStyle = gradient; ctx.lineCap = 'round'; ctx.shadowBlur = 15; ctx.shadowColor = '#ec4899';
-                ctx.beginPath();
-                const sliceWidth = canvas.width * 1.0 / bufferLength;
-                let x = 0;
-                for (let i = 0; i < bufferLength; i += 4) {
-                    const v = timeDomainArray[i] * 5; 
-                    const y = canvas.height / 2 + v * (canvas.height / 2);
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                    x += sliceWidth * 4;
+                if (detectedPitch > 70 && detectedPitch < 500) { 
+                    currentPitch = currentPitch * 0.8 + detectedPitch * 0.2; 
+                    sessionData.push(detectedPitch); 
+                    updateUI(currentPitch); 
                 }
-                ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
+
+                // --- VISUALIZATION LOGIC ---
+                if (visualizerMode === 'wave') {
+                    // Standard Waveform
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                    gradient.addColorStop(0, '#ec4899'); gradient.addColorStop(0.5, '#a855f7'); gradient.addColorStop(1, '#ec4899');
+                    ctx.lineWidth = 3; ctx.strokeStyle = gradient; ctx.lineCap = 'round'; ctx.shadowBlur = 15; ctx.shadowColor = '#ec4899';
+                    ctx.beginPath();
+                    const sliceWidth = canvas.width * 1.0 / bufferLength;
+                    let x = 0;
+                    for (let i = 0; i < bufferLength; i += 4) {
+                        const v = timeDomainArray[i] * 5; 
+                        const y = canvas.height / 2 + v * (canvas.height / 2);
+                        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                        x += sliceWidth * 4;
+                    }
+                    ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
+
+                } else {
+                    // "Harmonic Aura" (Waterfall Spectrogram)
+                    analyser.getByteFrequencyData(freqArray);
+                    
+                    // Shift existing image left
+                    const temp = ctx.getImageData(1, 0, canvas.width - 1, canvas.height);
+                    ctx.putImageData(temp, 0, 0);
+
+                    // Draw new line at right edge
+                    const barHeight = canvas.height;
+                    for (let i = 0; i < barHeight; i++) {
+                         // Map Y position to Frequency Index (approx log scale looks better but linear is fine for simple visual)
+                         const freqIndex = Math.floor((1 - i/barHeight) * (bufferLength/4)); // Only show lower freqs
+                         const value = freqArray[freqIndex];
+                         
+                         // Color Map: value -> opacity/brightness
+                         if(value > 10) {
+                             // Pink/Purple based on intensity
+                             const r = 236; 
+                             const g = 72 + (value/2); 
+                             const b = 153 + (value/2);
+                             ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${value/255})`;
+                             ctx.fillRect(canvas.width - 2, i, 2, 1);
+                         } else {
+                             ctx.fillStyle = 'rgba(0,0,0,1)';
+                             ctx.fillRect(canvas.width - 2, i, 2, 1);
+                         }
+                    }
+                }
             };
             draw();
         }
@@ -987,62 +989,111 @@
             const display = document.getElementById('pitch-display');
             if(display) {
                 display.innerText = Math.round(hz) + ' Hz';
-                if (hz > 170 && hz < 240) display.className = "px-2 py-0.5 rounded text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30";
+                if (hz > userSettings.minHz && hz < userSettings.maxHz) display.className = "px-2 py-0.5 rounded text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30";
                 else display.className = "px-2 py-0.5 rounded text-xs font-bold bg-gray-500/20 text-gray-300 border border-gray-500/30";
             }
             const needle = document.getElementById('pitch-needle');
             if(needle) { const percentage = Math.min(Math.max((hz - 80) / (320) * 100, 0), 100); needle.style.left = percentage + '%'; }
             const feedback = document.getElementById('feedback-text');
             if(feedback) {
-                if (hz < 145) feedback.innerText = "Deep & Sultry (Masc Range) 🖤";
-                else if (hz >= 145 && hz < 175) feedback.innerText = "Androgynous Zone ✨";
-                else if (hz >= 175 && hz < 240) feedback.innerText = "Perfect Fem Resonance! 💖";
-                else if (hz >= 240) feedback.innerText = "High & Cute! 🎀";
+                if (hz < userSettings.minHz - 30) feedback.innerText = "Deep & Sultry (Masc Range) 🖤";
+                else if (hz >= userSettings.minHz - 30 && hz < userSettings.minHz) feedback.innerText = "Androgynous Zone ✨";
+                else if (hz >= userSettings.minHz && hz < userSettings.maxHz) feedback.innerText = "Perfect Fem Resonance! 💖";
+                else if (hz >= userSettings.maxHz) feedback.innerText = "High & Cute! 🎀";
             }
         }
         
-        function updateCard() {
-            const wordData = WORD_BANK[currentWordIndex];
-            document.getElementById('card-word').innerText = wordData.word;
-            document.getElementById('card-category').innerText = wordData.category;
-            document.getElementById('card-tip').innerText = `"${wordData.tip}"`;
+        // --- HELPERS ---
+        function analyzeSession() {
+            const duration = (Date.now() - sessionStartTime) / 1000;
+            if (duration < 3 || sessionData.length < 10) return; 
+            const validSamples = sessionData.filter(hz => hz > 70);
+            if (validSamples.length === 0) return;
+            const avgPitch = validSamples.reduce((a, b) => a + b, 0) / validSamples.length;
+            const femSamples = validSamples.filter(hz => hz >= userSettings.minHz && hz <= userSettings.maxHz).length;
+            const score = (femSamples / validSamples.length) * 100;
+            let narrative = "", title = "";
+            if (score > 85) { title = "Goddess Energy! 💖"; narrative = "Wow! Your voice was consistently bright, feminine, and absolutely stunning."; } 
+            else if (score > 60) { title = "Looking Cute ✨"; narrative = "You're getting there, doll! You spent a lot of time in the femme range."; } 
+            else if (score > 30) { title = "Warming Up 🌸"; narrative = "Good effort! Your voice is still finding its footing."; } 
+            else { title = "Deep & Sultry 🖤"; narrative = "You stayed mostly in the lower range today."; }
+            if (currentUser) {
+                currentUser.sessions.push({ date: new Date().toISOString(), duration: duration, avgPitch: avgPitch, score: score, narrative: title });
+                saveUser();
+            }
+            showReportCard(Math.round(score), Math.round(avgPitch), Math.round(duration), narrative);
+            sessionData = [];
         }
 
-        function changeWord(direction) {
-            currentWordIndex += direction;
-            if (currentWordIndex < 0) currentWordIndex = WORD_BANK.length - 1;
-            if (currentWordIndex >= WORD_BANK.length) currentWordIndex = 0;
-            updateCard();
+        function showReportCard(score, avg, time, text) {
+            document.getElementById('report-modal').classList.remove('hidden');
+            document.getElementById('report-score').innerText = score + "%";
+            document.getElementById('report-avg').innerText = avg + " Hz";
+            document.getElementById('report-time').innerText = time + "s";
+            document.getElementById('report-narrative').innerText = `"${text}"`;
+            const circle = document.getElementById('score-circle');
+            const circumference = 2 * Math.PI * 46; 
+            const offset = circumference - (score / 100) * circumference;
+            circle.style.strokeDashoffset = circumference;
+            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
         }
+
+        function closeReport() {
+            document.getElementById('report-modal').classList.add('hidden');
+            switchMode('scoreboard'); 
+        }
+
+        // --- OTHER UTILS ---
+        function speakWord() {
+            const word = WORD_BANK[currentWordIndex].word;
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.pitch = 1.2; utterance.rate = 0.9;
+                const voices = window.speechSynthesis.getVoices();
+                const femVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google US English'));
+                if(femVoice) utterance.voice = femVoice;
+                window.speechSynthesis.speak(utterance);
+            } else alert("TTS not supported.");
+        }
+        function playTone(freq) { stopTone(); const ToneCtx = new (window.AudioContext || window.webkitAudioContext)(); oscillator = ToneCtx.createOscillator(); gainNode = ToneCtx.createGain(); oscillator.type = 'sine'; oscillator.frequency.value = freq; gainNode.gain.setValueAtTime(0.1, ToneCtx.currentTime); oscillator.connect(gainNode); gainNode.connect(ToneCtx.destination); oscillator.start(); }
+        function stopTone() { if (oscillator) { oscillator.stop(); oscillator.disconnect(); oscillator = null; } if(gainNode) { gainNode.disconnect(); gainNode = null; } }
+        async function toggleRecording() { const btn = document.getElementById('record-btn'); const dot = document.getElementById('record-dot'); const text = document.getElementById('record-text'); const playBtn = document.getElementById('play-btn'); if (!isRecording) { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(stream); audioChunks = []; mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); }; mediaRecorder.onstop = () => { const audioBlob = new Blob(audioChunks, { type: 'audio/wav' }); audioBlobUrl = URL.createObjectURL(audioBlob); const audio = document.getElementById('audio-playback'); audio.src = audioBlobUrl; playBtn.classList.replace('text-gray-500', 'text-white'); playBtn.classList.replace('bg-white/5', 'bg-green-500/20'); playBtn.classList.replace('border-white/5', 'border-green-500/30'); playBtn.disabled = false; stream.getTracks().forEach(track => track.stop()); }; mediaRecorder.start(); isRecording = true; dot.classList.remove('hidden'); text.innerText = "Stop"; btn.classList.add('bg-red-500/40'); playBtn.disabled = true; } catch(e) { console.error(e); alert("Mic access needed."); } } else { mediaRecorder.stop(); isRecording = false; dot.classList.add('hidden'); text.innerText = "Record"; btn.classList.remove('bg-red-500/40'); } }
+        function playRecording() { const audio = document.getElementById('audio-playback'); if(audioBlobUrl) { audio.play(); } }
         
-        function renderTutorialList() {
-            const list = document.getElementById('tutorial-list');
-            list.innerHTML = '';
-            TUTORIALS.forEach(tut => {
-                const item = document.createElement('div');
-                item.className = "glass-panel p-4 md:p-6 rounded-3xl hover:bg-white/5 transition cursor-pointer group";
-                item.onclick = () => openTutorial(tut);
-                item.innerHTML = `<div class="flex justify-between items-center"><div><span class="text-xs text-pink-400 font-bold tracking-wider uppercase mb-1 block">${tut.level}</span><h3 class="text-lg md:text-xl font-bold text-white mb-1 group-hover:text-pink-300 transition">${tut.title}</h3><p class="text-xs md:text-sm text-gray-400 line-clamp-2">${tut.description}</p></div><div class="bg-pink-500/20 p-2 md:p-3 rounded-full group-hover:bg-pink-500 group-hover:text-white transition text-pink-500 ml-4 shrink-0"><i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i></div></div>`;
-                list.appendChild(item);
-            });
-            lucide.createIcons();
+        function toggleTalkMode() {
+            const btn = document.getElementById('talk-btn');
+            const statusDot = document.getElementById('talk-status-dot');
+            const statusText = document.getElementById('talk-status-text');
+            if(isTalking) {
+                if(recognition) recognition.stop();
+                if(audioContext) audioContext.close();
+                if(microphone) microphone.getTracks().forEach(track => track.stop());
+                isTalking = false;
+                btn.classList.replace('bg-gray-500', 'bg-pink-500');
+                btn.innerHTML = '<i data-lucide="mic" class="w-4 h-4"></i> Start Talking';
+                statusDot.classList.replace('bg-green-500', 'bg-gray-500'); statusDot.classList.remove('animate-pulse'); statusText.innerText = "Ready";
+            } else {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { alert("Speech Rec not supported."); return; }
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US';
+                recognition.onstart = () => { document.getElementById('talk-placeholder').style.display = 'none'; statusDot.classList.replace('bg-gray-500', 'bg-green-500'); statusDot.classList.add('animate-pulse'); statusText.innerText = "Listening..."; };
+                recognition.onresult = (event) => { const transcript = event.results[event.results.length - 1][0].transcript; analyzePhrase(transcript); talkPitchData = []; };
+                recognition.onerror = (event) => { console.error("Speech error", event.error); toggleTalkMode(); };
+                recognition.start();
+                startBackgroundPitchTracker();
+                isTalking = true;
+                btn.classList.replace('bg-pink-500', 'bg-gray-500'); btn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i> Stop';
+            }
         }
-
-        function openTutorial(tut) {
-            document.getElementById('tutorial-list').classList.add('hidden');
-            const detail = document.getElementById('tutorial-detail');
-            detail.classList.remove('hidden');
-            document.getElementById('tut-title').innerText = tut.title;
-            document.getElementById('tut-desc').innerText = tut.description;
-            const stepsContainer = document.getElementById('tut-steps');
-            stepsContainer.innerHTML = '';
-            tut.steps.forEach((step, idx) => { stepsContainer.innerHTML += `<div class="flex gap-3 md:gap-4"><div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 border border-pink-500/50 flex items-center justify-center text-pink-300 text-sm md:text-base font-bold shrink-0">${idx + 1}</div><p class="text-sm md:text-lg text-gray-200 pt-0.5">${step}</p></div>`; });
-        }
-
-        function closeTutorial() {
-            document.getElementById('tutorial-detail').classList.add('hidden');
-            document.getElementById('tutorial-list').classList.remove('hidden');
-        }
+        async function startBackgroundPitchTracker() { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser); const bufferLength = analyser.frequencyBinCount; const timeDomainArray = new Float32Array(bufferLength); const loop = () => { if(!isTalking) return; requestAnimationFrame(loop); analyser.getFloatTimeDomainData(timeDomainArray); const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate); if(pitch > 70 && pitch < 500) { talkPitchData.push(pitch); } }; loop(); } catch(e) { console.error(e); } }
+        function analyzePhrase(text) { const log = document.getElementById('talk-log'); let avgPitch = 0; let feedback = "No audio detected"; let type = "masc"; if(talkPitchData.length > 0) { avgPitch = Math.round(talkPitchData.reduce((a, b) => a + b, 0) / talkPitchData.length); if(avgPitch > userSettings.minHz && avgPitch < userSettings.maxHz) { feedback = "Excellent! Perfect feminine range."; type = "fem"; } else if (avgPitch >= userSettings.minHz - 30 && avgPitch <= userSettings.minHz) { feedback = "Good, aiming for androgynous."; type = "andro"; } else if (avgPitch < userSettings.minHz - 30) { feedback = "A bit deep. Try raising your larynx."; type = "masc"; } else { feedback = "Very high! Be careful of strain."; type = "fem"; } } const bubble = document.createElement('div'); bubble.className = `chat-bubble ${type} fade-in`; bubble.innerHTML = `<div class="font-bold text-white mb-1">"${text}"</div><div class="flex justify-between items-center text-xs"><span class="text-pink-300 font-mono">${avgPitch > 0 ? avgPitch + ' Hz' : '--'}</span><span class="text-gray-400 italic">${feedback}</span></div>`; log.appendChild(bubble); log.scrollTop = log.scrollHeight; }
+        
+        // --- HELPERS FOR OTHER VIEWS ---
+        function changeWord(d) { currentWordIndex += d; if(currentWordIndex < 0) currentWordIndex = WORD_BANK.length - 1; if(currentWordIndex >= WORD_BANK.length) currentWordIndex = 0; updateCard(); }
+        function renderTutorialList() { const list = document.getElementById('tutorial-list'); list.innerHTML = ''; TUTORIALS.forEach(tut => { const item = document.createElement('div'); item.className = "glass-panel p-4 md:p-6 rounded-3xl hover:bg-white/5 transition cursor-pointer group"; item.onclick = () => openTutorial(tut); item.innerHTML = `<div class="flex justify-between items-center"><div><span class="text-xs text-pink-400 font-bold tracking-wider uppercase mb-1 block">${tut.level}</span><h3 class="text-lg md:text-xl font-bold text-white mb-1 group-hover:text-pink-300 transition">${tut.title}</h3><p class="text-xs md:text-sm text-gray-400 line-clamp-2">${tut.description}</p></div><div class="bg-pink-500/20 p-2 md:p-3 rounded-full group-hover:bg-pink-500 group-hover:text-white transition text-pink-500 ml-4 shrink-0"><i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i></div></div>`; list.appendChild(item); }); lucide.createIcons(); }
+        function openTutorial(tut) { document.getElementById('tutorial-list').classList.add('hidden'); document.getElementById('tutorial-detail').classList.remove('hidden'); document.getElementById('tut-title').innerText = tut.title; document.getElementById('tut-desc').innerText = tut.description; const steps = document.getElementById('tut-steps'); steps.innerHTML = ''; tut.steps.forEach((step, idx) => { steps.innerHTML += `<div class="flex gap-3 md:gap-4"><div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 border border-pink-500/50 flex items-center justify-center text-pink-300 text-sm md:text-base font-bold shrink-0">${idx + 1}</div><p class="text-sm md:text-lg text-gray-200 pt-0.5">${step}</p></div>`; }); }
+        function closeTutorial() { document.getElementById('tutorial-detail').classList.add('hidden'); document.getElementById('tutorial-list').classList.remove('hidden'); }
     </script>
 </body>
 </html>
