@@ -9,6 +9,18 @@
     
     <!-- Tailwind CSS (via CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        theme: 'var(--theme-color)',
+                        themeDim: 'var(--theme-dim)',
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Lucide Icons (via CDN) -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,14 +33,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --theme-color: #ec4899; /* Default Pink */
+            --theme-dim: rgba(236, 72, 153, 0.2);
+        }
+        
         body { font-family: 'Inter', sans-serif; }
         .font-script { font-family: 'Dancing Script', cursive; }
+        
+        /* Dynamic Theme Application */
+        .text-theme { color: var(--theme-color); }
+        .bg-theme { background-color: var(--theme-color); }
+        .border-theme { border-color: var(--theme-color); }
+        .bg-theme-dim { background-color: var(--theme-dim); }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1a1025; }
         ::-webkit-scrollbar-thumb { background: #4a305e; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
 
         /* Animation Utilities */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -36,9 +59,9 @@
         
         .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
         @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 var(--theme-dim); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,0,0,0); }
         }
 
         .glass-panel {
@@ -60,13 +83,7 @@
             box-shadow: 0 0 0 2px #eab308, 0 0 20px rgba(234, 179, 8, 0.5) !important;
             cursor: help !important;
             transform: scale(1.02);
-            transition: transform 0.2s;
-        }
-        
-        .blur-background {
-            filter: blur(4px) brightness(0.7);
-            pointer-events: none;
-            transition: filter 0.3s;
+            transition: all 0.2s;
         }
 
         .breathing-circle {
@@ -109,10 +126,10 @@
             height: 20px;
             width: 20px;
             border-radius: 50%;
-            background: #ec4899;
+            background: var(--theme-color);
             cursor: pointer;
             margin-top: -8px; 
-            box-shadow: 0 0 10px rgba(236,72,153,0.5);
+            box-shadow: 0 0 10px var(--theme-dim);
         }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
@@ -126,6 +143,11 @@
             filter: blur(5px);
             pointer-events: none;
             user-select: none;
+        }
+        
+        /* Game Canvas */
+        #game-canvas {
+            image-rendering: pixelated; 
         }
     </style>
 </head>
@@ -166,25 +188,36 @@
         </div>
     </div>
     
-    <!-- Premium Upgrade Modal -->
+    <!-- Premium Upgrade Modal (Manual Code System) -->
     <div id="premium-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 hidden p-4 backdrop-blur-md">
         <div class="glass-panel p-1 rounded-3xl max-w-sm w-full animate-fadeIn border-yellow-500/30 max-h-[90vh] overflow-y-auto">
             <div class="bg-gradient-to-b from-[#1a1025] to-[#0f0518] rounded-[22px] p-6 text-center relative overflow-hidden">
                 <button onclick="closePremiumModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
-                <div class="w-16 h-16 mx-auto bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(234,179,8,0.4)]"><i data-lucide="crown" class="w-8 h-8 text-white fill-current"></i></div>
+                
+                <div class="w-16 h-16 mx-auto bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                    <i data-lucide="crown" class="w-8 h-8 text-white fill-current"></i>
+                </div>
+                
                 <h3 class="text-white font-bold text-2xl mb-1">Upgrade to <span class="text-yellow-400">Doll+</span></h3>
                 <p class="text-xs text-gray-400 mb-6">Unlock the full potential of your voice.</p>
+
+                <!-- Features List -->
                 <div class="space-y-4 text-left mb-8">
+                     <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-pink-500/20 rounded-lg text-pink-400"><i data-lucide="gamepad-2" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Voice Glide</div><div class="text-xs text-gray-400">Play games with your pitch.</div></div></div>
+                     <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-blue-500/20 rounded-lg text-blue-400"><i data-lucide="headphones" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Masking Noise</div><div class="text-xs text-gray-400">Hear your true voice with pink noise.</div></div></div>
                     <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-red-500/20 rounded-lg text-red-400"><i data-lucide="whip" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Mistress Mode</div><div class="text-xs text-gray-400">Degradation feedback & erotic tasks.</div></div></div>
-                    <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-pink-500/20 rounded-lg text-pink-400"><i data-lucide="waves" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Harmonic Aura</div><div class="text-xs text-gray-400">See resonance weight.</div></div></div>
-                    <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-green-500/20 rounded-lg text-green-400"><i data-lucide="activity" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Unlimited History</div><div class="text-xs text-gray-400">Track your timeline forever.</div></div></div>
+                    <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5"><div class="p-2 bg-yellow-500/20 rounded-lg text-yellow-400"><i data-lucide="palette" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-white">Themes</div><div class="text-xs text-gray-400">Unlock Gold, Purple, and Red themes.</div></div></div>
                 </div>
+
+                <!-- Manual Unlock System -->
                 <div class="bg-black/30 p-4 rounded-xl border border-white/5">
                     <p class="text-xs text-gray-400 mb-2">Have a code from Ko-fi/Patreon?</p>
-                    <div class="flex gap-2"><input type="text" id="unlock-code-input" placeholder="Enter Code (e.g. DOLLPLUS)" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500"><button onclick="checkUnlockCode()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg text-sm hover:bg-yellow-400 transition">Redeem</button></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="unlock-code-input" placeholder="Enter Code (e.g. DOLLPLUS)" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500">
+                        <button onclick="checkUnlockCode()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg text-sm hover:bg-yellow-400 transition">Redeem</button>
+                    </div>
                     <p id="unlock-msg" class="text-[10px] mt-2 h-3 font-bold"></p>
                 </div>
-                <div class="mt-4 pt-4 border-t border-white/5"><button onclick="unlockPremiumFeatures()" class="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold shadow-lg shadow-yellow-500/20 hover:scale-[1.02] transition-transform mb-3">Unlock All Features (Free)</button><p class="text-[10px] text-gray-500">No payment required for this version.</p></div>
             </div>
         </div>
     </div>
@@ -235,7 +268,7 @@
                 
                 <div class="text-right hidden sm:block">
                     <div id="user-display-name" class="text-sm font-bold text-white">Guest</div>
-                    <div id="user-display-badge" class="text-[10px] text-pink-400 uppercase tracking-wider">Level 1 Doll</div>
+                    <div id="user-display-badge" class="text-[10px] text-theme uppercase tracking-wider">Level 1 Doll</div>
                 </div>
                 <!-- Profile Avatar -->
                 <div id="avatar-container" class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 p-[2px] cursor-pointer shrink-0 transition-all duration-500" onclick="logout()">
@@ -251,16 +284,21 @@
             <!-- Sidebar -->
             <div class="md:col-span-4 flex flex-col gap-6">
                 <div class="glass-panel rounded-3xl p-6 relative overflow-hidden h-full flex flex-col justify-between min-h-[auto] md:min-h-[300px]">
-                    <div class="absolute -top-20 -right-20 w-40 h-40 bg-pink-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -top-20 -right-20 w-40 h-40 bg-theme-dim rounded-full blur-3xl pointer-events-none"></div>
                     <div>
                         <h2 class="text-xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
                             <i data-lucide="crown" class="w-5 h-5 text-yellow-400"></i> Dashboard
                         </h2>
                         <div class="grid grid-cols-2 md:flex md:flex-col gap-3">
-                            <button onclick="switchMode('practice')" id="btn-practice" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-pink-500/20 text-white font-medium text-sm md:text-base" data-help="Real-time feedback on your pitch. Use this daily.">
+                            <button onclick="switchMode('practice')" id="btn-practice" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-theme bg-theme-dim text-white font-medium text-sm md:text-base" data-help="Real-time feedback on your pitch. Use this daily.">
                                 <i data-lucide="mic" class="w-4 h-4 shrink-0"></i> <span>Practice</span>
                             </button>
-                            <button onclick="switchMode('conditioning')" id="btn-conditioning" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base" data-help="Intensive drills to build vocal stamina.">
+                             <!-- GAME BUTTON (NEW) -->
+                            <button onclick="switchMode('game')" id="btn-game" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base group" data-help="Play Voice Glide! Pitch controlled game.">
+                                <i data-lucide="gamepad-2" class="w-4 h-4 shrink-0"></i> <span>Voice Glide</span>
+                                <div id="lock-game" class="absolute right-2 top-1/2 -translate-y-1/2 text-yellow-500 hidden"><i data-lucide="lock" class="w-3 h-3"></i></div>
+                            </button>
+                            <button onclick="switchMode('conditioning')" id="btn-conditioning" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-theme bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base" data-help="Intensive drills to build vocal stamina.">
                                 <i data-lucide="dumbbell" class="w-4 h-4 shrink-0"></i> <span>Conditioning</span>
                             </button>
                             <button onclick="switchMode('oracle')" id="btn-oracle" class="mode-btn relative overflow-hidden transition-all duration-300 w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 py-3 px-3 rounded-xl border border-pink-500/30 bg-white/5 text-pink-200 hover:bg-white/10 font-medium text-sm md:text-base group" data-help="A Magic 8-Ball that judges you based on your pitch.">
@@ -284,8 +322,8 @@
                         </div>
                     </div>
                     <div class="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/10 flex items-center gap-4 justify-center md:justify-start">
-                        <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center relative shrink-0">
-                             <div class="absolute inset-0 bg-pink-500/40 rounded-full breathing-circle"></div>
+                        <div class="w-12 h-12 bg-theme-dim rounded-full flex items-center justify-center relative shrink-0">
+                             <div class="absolute inset-0 bg-theme rounded-full breathing-circle opacity-40"></div>
                              <div class="relative text-[10px] font-bold">In / Out</div>
                         </div>
                         <div class="text-xs text-gray-400 italic">"Breathe deep into your tummy."</div>
@@ -300,7 +338,7 @@
                 <div id="view-practice" class="view-section fade-in flex flex-col gap-6">
                     <!-- Tones -->
                     <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4" data-help="Play these notes to hear what 175-220Hz sounds like.">
-                         <div class="text-xs text-pink-300 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="tuning-fork" class="w-4 h-4"></i> Pitch Pipe</div>
+                         <div class="text-xs text-theme font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="tuning-fork" class="w-4 h-4"></i> Pitch Pipe</div>
                          <div class="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
                              <button onclick="playTone(175)" class="flex-1 sm:flex-none px-3 py-2 bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/30 rounded-lg text-xs font-bold text-purple-200 transition min-w-[70px]">F3 (175)</button>
                              <button onclick="playTone(200)" class="flex-1 sm:flex-none px-3 py-2 bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 rounded-lg text-xs font-bold text-pink-200 transition min-w-[70px]">G3 (200)</button>
@@ -310,13 +348,17 @@
                     </div>
 
                     <!-- Visualizer -->
-                    <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden flex flex-col items-center justify-center border-pink-500/20 shadow-pink-900/20 min-h-[280px] md:min-h-[320px]" data-help="The main stage. Speak here to see your voice visualized.">
+                    <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden flex flex-col items-center justify-center border-theme shadow-pink-900/20 min-h-[280px] md:min-h-[320px]" data-help="The main stage. Speak here to see your voice visualized.">
                         <div class="absolute top-4 left-4 flex gap-2 z-30">
                             <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
                             <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                             <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
                         </div>
-                        <div class="absolute top-4 right-4 z-30">
+                        <div class="absolute top-4 right-4 z-30 flex gap-2">
+                             <!-- Pink Noise Toggle (NEW) -->
+                            <button onclick="togglePinkNoise()" id="noise-btn" class="px-3 py-1 bg-black/40 rounded-full border border-white/10 text-[10px] text-gray-400 hover:bg-white/10 transition uppercase tracking-widest font-bold flex items-center gap-2">
+                                <i data-lucide="headphones" class="w-3 h-3"></i> Noise <i id="noise-lock" data-lucide="lock" class="w-3 h-3 text-yellow-500 hidden"></i>
+                            </button>
                             <button onclick="toggleVisualizerMode()" class="px-3 py-1 bg-black/40 rounded-full border border-white/10 text-[10px] text-pink-300 hover:bg-white/10 transition uppercase tracking-widest font-bold flex items-center gap-2">
                                 <span id="vis-mode-label">Aura</span> <i id="vis-lock-icon" data-lucide="lock" class="w-3 h-3 text-yellow-500 hidden"></i>
                             </button>
@@ -324,7 +366,7 @@
                         <div class="w-full h-40 md:h-48 flex items-center justify-center relative">
                             <canvas id="audioCanvas" class="w-full h-full opacity-80"></canvas>
                             <div id="start-prompt" class="absolute inset-0 flex items-center justify-center flex-col text-center animate-pulse pointer-events-none">
-                                <p class="text-pink-300/50 font-light text-2xl md:text-4xl">Tap to Speak</p>
+                                <p class="text-theme font-light text-2xl md:text-4xl">Tap to Speak</p>
                             </div>
                         </div>
                         <div class="mt-2 md:mt-4 text-center z-10 h-8">
@@ -340,13 +382,13 @@
                     <!-- Pitch Display -->
                     <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden mt-2" data-help="Your current pitch. Try to keep the needle in the pink 'Goal' zone.">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-pink-300 font-bold flex items-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Real-time Hz</h3>
+                            <h3 class="text-theme font-bold flex items-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Real-time Hz</h3>
                             <span id="pitch-display" class="px-2 py-0.5 rounded text-xs font-bold bg-gray-500/20 text-gray-300 border border-gray-500/30">0 Hz</span>
                         </div>
                         <div class="relative h-20 md:h-24 flex items-end justify-between gap-1 px-2 border-b border-white/5 pb-2">
                             <div class="absolute left-0 bottom-0 text-[10px] text-gray-500">80Hz</div>
                             <div class="absolute right-0 bottom-0 text-[10px] text-gray-500">400Hz</div>
-                            <div id="target-zone-visual" class="absolute bottom-0 h-full bg-pink-500/10 border-x border-pink-500/20 transition-all duration-300" style="left: 30%; width: 25%;"><div class="absolute top-2 w-full text-center text-[10px] text-pink-500 font-bold tracking-widest opacity-50">GOAL</div></div>
+                            <div id="target-zone-visual" class="absolute bottom-0 h-full bg-theme-dim border-x border-theme transition-all duration-300" style="left: 30%; width: 25%;"><div class="absolute top-2 w-full text-center text-[10px] text-theme font-bold tracking-widest opacity-50">GOAL</div></div>
                             <div id="pitch-needle" class="absolute bottom-0 w-1 bg-white h-full transition-all duration-200 shadow-[0_0_10px_white] z-10 left-0"><div class="w-3 h-3 bg-white rounded-full absolute top-0 -left-1"></div></div>
                         </div>
                         <p class="text-xs text-gray-400 mt-2 text-center">Aim for the pink zone!</p>
@@ -355,8 +397,11 @@
                     <!-- Vanity Mirror (Recording) -->
                     <div class="glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden" data-help="Record your voice and play it back to check if it sounds natural.">
                         <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-pink-300 font-bold flex items-center gap-2"><i data-lucide="cassette-tape" class="w-4 h-4"></i> Vanity Mirror</h3>
-                            <div id="mirror-limit-badge" class="text-[10px] bg-white/10 text-gray-400 px-2 py-0.5 rounded">10s Limit</div>
+                            <h3 class="text-theme font-bold flex items-center gap-2"><i data-lucide="cassette-tape" class="w-4 h-4"></i> Vanity Mirror</h3>
+                            <div class="flex items-center gap-2">
+                                <button onclick="downloadRecording()" id="download-btn" class="text-gray-500 hover:text-white transition disabled:opacity-30" disabled title="Download (Premium)"><i data-lucide="download" class="w-4 h-4"></i></button>
+                                <div id="mirror-limit-badge" class="text-[10px] bg-white/10 text-gray-400 px-2 py-0.5 rounded">10s Limit</div>
+                            </div>
                         </div>
                         <div class="bg-black/40 rounded-xl p-4 flex flex-col items-center gap-4">
                             <p class="text-xs text-gray-400 text-center">Record and playback to check your weight & resonance.</p>
@@ -370,6 +415,31 @@
                                 </button>
                             </div>
                             <audio id="audio-playback" class="hidden"></audio>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: GAME (NEW) -->
+                <div id="view-game" class="view-section hidden fade-in flex-col gap-6 h-full">
+                    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[500px] flex flex-col items-center justify-center text-center">
+                        <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+                            <i data-lucide="gamepad-2" class="w-5 h-5 text-theme"></i>
+                            <span class="text-sm font-bold">Voice Glide</span>
+                        </div>
+                        <div class="absolute top-4 right-4 z-10 text-white font-mono text-xl" id="game-score">0</div>
+                        
+                        <div class="relative w-full h-[300px] bg-black/40 rounded-xl border border-white/10 overflow-hidden mb-4">
+                            <canvas id="game-canvas" class="w-full h-full"></canvas>
+                            <div id="game-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-20">
+                                <h3 class="text-2xl font-bold text-white mb-2">Ready?</h3>
+                                <p class="text-sm text-gray-300 mb-6">Use your voice pitch to fly.</p>
+                                <button onclick="startGame()" class="px-8 py-3 bg-theme hover:bg-pink-600 rounded-full text-white font-bold shadow-lg shadow-pink-500/30 transition transform hover:scale-105">Start Game</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 text-xs text-gray-400">
+                             <div class="flex items-center gap-2"><div class="w-3 h-3 bg-green-400 rounded-full"></div> High Pitch = Up</div>
+                             <div class="flex items-center gap-2"><div class="w-3 h-3 bg-red-400 rounded-full"></div> Low Pitch = Down</div>
                         </div>
                     </div>
                 </div>
@@ -406,7 +476,7 @@
                         <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
                             <div>
                                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                                    <i data-lucide="dumbbell" class="w-6 h-6 text-pink-400"></i> Conditioning
+                                    <i data-lucide="dumbbell" class="w-6 h-6 text-theme"></i> Conditioning
                                 </h2>
                                 <p class="text-sm text-gray-400">Intensive tasks. Strict goals.</p>
                             </div>
@@ -416,14 +486,14 @@
                             <div class="grid gap-3 mb-6">
                                 <button onclick="startConditioningTask(0)" class="text-left bg-white/5 hover:bg-white/10 p-4 rounded-xl border border-white/5 transition group">
                                     <div class="flex justify-between items-center mb-1">
-                                        <h3 class="font-bold text-white group-hover:text-pink-300">The Stamina Test</h3>
-                                        <span class="text-xs bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded">Hard</span>
+                                        <h3 class="font-bold text-white group-hover:text-theme">The Stamina Test</h3>
+                                        <span class="text-xs bg-theme-dim text-theme px-2 py-0.5 rounded">Hard</span>
                                     </div>
                                     <p class="text-xs text-gray-400">Hold a pitch above 200Hz for 10 seconds without dropping.</p>
                                 </button>
                                 <button onclick="startConditioningTask(1)" class="text-left bg-white/5 hover:bg-white/10 p-4 rounded-xl border border-white/5 transition group">
                                     <div class="flex justify-between items-center mb-1">
-                                        <h3 class="font-bold text-white group-hover:text-pink-300">Pitch Perfect</h3>
+                                        <h3 class="font-bold text-white group-hover:text-theme">Pitch Perfect</h3>
                                         <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">Medium</span>
                                     </div>
                                     <p class="text-xs text-gray-400">Match the G3 tone (200Hz) precisely.</p>
@@ -451,18 +521,18 @@
                         <div id="task-active" class="hidden flex-col items-center justify-center flex-grow text-center">
                             <h3 id="task-name" class="text-2xl font-bold text-white mb-4">Task Name</h3>
                             <p id="task-instruction" class="text-sm text-gray-400 mb-6 max-w-xs mx-auto hidden"></p>
-                            <div class="w-32 h-32 rounded-full border-4 border-pink-500/30 flex items-center justify-center mb-6 relative">
-                                <div id="task-progress-circle" class="absolute inset-0 rounded-full border-4 border-pink-500 border-t-transparent w-full h-full animate-spin"></div>
+                            <div class="w-32 h-32 rounded-full border-4 border-theme-dim flex items-center justify-center mb-6 relative">
+                                <div id="task-progress-circle" class="absolute inset-0 rounded-full border-4 border-theme border-t-transparent w-full h-full animate-spin"></div>
                                 <span id="task-timer" class="text-3xl font-mono text-white">10</span>
                             </div>
-                            <div id="task-feedback" class="text-lg text-pink-200 font-bold h-8">Listening...</div>
+                            <div id="task-feedback" class="text-lg text-theme font-bold h-8">Listening...</div>
                             <button onclick="stopConditioningTask()" class="mt-8 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm">Cancel</button>
                         </div>
 
                         <div id="task-result" class="hidden flex-col items-center justify-center flex-grow text-center">
                             <h3 id="result-title" class="text-3xl font-bold text-white mb-2">Result</h3>
                             <p id="result-msg" class="text-lg text-gray-300 mb-8 max-w-xs mx-auto italic">"Feedback goes here"</p>
-                            <button onclick="resetTaskView()" class="px-8 py-3 bg-pink-500 hover:bg-pink-600 rounded-xl text-white font-bold">Continue</button>
+                            <button onclick="resetTaskView()" class="px-8 py-3 bg-theme hover:bg-pink-600 rounded-xl text-white font-bold">Continue</button>
                         </div>
                     </div>
                 </div>
@@ -471,7 +541,7 @@
                 <div id="view-scoreboard" class="view-section hidden fade-in flex-col gap-6">
                     <div class="glass-panel rounded-3xl p-4 md:p-8 relative overflow-hidden min-h-[500px]">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="p-3 bg-pink-500/20 rounded-xl text-pink-400"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+                            <div class="p-3 bg-theme-dim rounded-xl text-theme"><i data-lucide="trophy" class="w-8 h-8"></i></div>
                             <div><h2 class="text-2xl font-bold text-white">Glitter Board</h2><p class="text-sm text-gray-400">Your journey to goddess.</p></div>
                         </div>
 
@@ -491,19 +561,19 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
                             <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
                                 <div id="stat-sessions" class="text-xl md:text-2xl font-bold text-white mb-1">0</div>
-                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Sessions</div>
+                                <div class="text-[8px] md:text-[10px] text-theme uppercase tracking-widest">Sessions</div>
                             </div>
                             <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
                                 <div id="stat-best" class="text-xl md:text-2xl font-bold text-white mb-1">0%</div>
-                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Best Score</div>
+                                <div class="text-[8px] md:text-[10px] text-theme uppercase tracking-widest">Best Score</div>
                             </div>
                             <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
                                 <div id="stat-avg" class="text-xl md:text-2xl font-bold text-white mb-1">0 Hz</div>
-                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Avg Hz</div>
+                                <div class="text-[8px] md:text-[10px] text-theme uppercase tracking-widest">Avg Hz</div>
                             </div>
                             <div class="bg-black/30 rounded-2xl p-2 md:p-4 text-center border border-white/5">
                                 <div id="stat-sub" class="text-xl md:text-2xl font-bold text-white mb-1">0</div>
-                                <div class="text-[8px] md:text-[10px] text-pink-400 uppercase tracking-widest">Submission</div>
+                                <div class="text-[8px] md:text-[10px] text-theme uppercase tracking-widest">Submission</div>
                             </div>
                         </div>
                         <div class="grid grid-cols-12 text-[10px] md:text-xs text-gray-500 uppercase tracking-wider mb-4 px-2 md:px-4">
@@ -519,8 +589,8 @@
                 <div id="view-talk" class="view-section hidden fade-in flex-col gap-6 h-full">
                      <div class="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[500px] flex flex-col">
                         <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-                            <div><h2 class="text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="message-circle" class="w-6 h-6 text-pink-400"></i> Talk & Train</h2><p class="text-sm text-gray-400">Conversational Practice.</p></div>
-                            <button id="talk-btn" onclick="toggleTalkMode()" class="px-6 py-2 rounded-full bg-pink-500 text-white font-bold text-sm shadow-lg hover:bg-pink-600 transition flex items-center gap-2"><i data-lucide="mic" class="w-4 h-4"></i> Start Talking</button>
+                            <div><h2 class="text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="message-circle" class="w-6 h-6 text-theme"></i> Talk & Train</h2><p class="text-sm text-gray-400">Conversational Practice.</p></div>
+                            <button id="talk-btn" onclick="toggleTalkMode()" class="px-6 py-2 rounded-full bg-theme text-white font-bold text-sm shadow-lg hover:bg-pink-600 transition flex items-center gap-2"><i data-lucide="mic" class="w-4 h-4"></i> Start Talking</button>
                         </div>
                         <div id="talk-log" class="flex-grow overflow-y-auto space-y-4 mb-4 pr-2 max-h-[400px]">
                             <div class="text-center text-gray-500 py-10 italic" id="talk-placeholder">Press start and say anything! <br> "Hello, how are you today?"</div>
@@ -538,9 +608,8 @@
                         </div>
                         <div class="relative flex-grow bg-black/20 rounded-xl p-6 overflow-hidden border border-white/5">
                             <div id="teleprompter" class="text-xl md:text-2xl leading-relaxed text-gray-300 font-serif text-center transition-transform duration-[50ms]">
-                                <p class="mb-8 font-bold text-pink-400">The Rainbow Passage</p>
-                                <p>When the sunlight strikes raindrops in the air, they act like a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow.</p>
-                                <p class="mt-8">Throughout the centuries men have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods. The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain. The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky.</p>
+                                <p class="mb-8 font-bold text-theme">The Rainbow Passage</p>
+                                <p>When the sunlight strikes raindrops in the air, they act like a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow.</p><p class="mt-8">Throughout the centuries men have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods. The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain. The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky.</p>
                             </div>
                             <div class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#130820] to-transparent pointer-events-none"></div>
                             <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#130820] to-transparent pointer-events-none"></div>
@@ -550,20 +619,20 @@
                 <div id="view-tutorials" class="view-section hidden fade-in flex-col gap-6">
                     <div id="tutorial-list" class="grid gap-4"></div>
                     <div id="tutorial-detail" class="hidden glass-panel rounded-3xl p-4 md:p-6 relative overflow-hidden min-h-[400px]">
-                        <button onclick="closeTutorial()" class="text-sm text-pink-400 hover:text-white mb-6 flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to list</button>
+                        <button onclick="closeTutorial()" class="text-sm text-theme hover:text-white mb-6 flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to list</button>
                         <h2 id="tut-title" class="text-2xl md:text-3xl font-bold text-white mb-2"></h2><p id="tut-desc" class="text-gray-400 mb-8 border-b border-white/10 pb-4"></p>
                         
                         <!-- Added Sticky Lesson Practice Button -->
                         <div class="absolute bottom-4 right-4 z-20">
-                            <button onclick="toggleLessonPractice()" id="lesson-practice-btn" class="px-4 py-2 bg-pink-500 rounded-full text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:bg-pink-600 transition"><i data-lucide="mic" class="w-3 h-3"></i> Try It</button>
+                            <button onclick="toggleLessonPractice()" id="lesson-practice-btn" class="px-4 py-2 bg-theme rounded-full text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:bg-pink-600 transition"><i data-lucide="mic" class="w-3 h-3"></i> Try It</button>
                         </div>
 
                         <div id="tut-steps" class="space-y-6 pb-20"></div>
 
                         <!-- Sticky Practice Bar (Bottom) -->
-                        <div id="lesson-practice-area" class="absolute bottom-0 left-0 w-full bg-[#1a1025] border-t border-pink-500/30 p-4 transform translate-y-full transition-transform duration-300 flex flex-col items-center z-30">
+                        <div id="lesson-practice-area" class="absolute bottom-0 left-0 w-full bg-[#1a1025] border-t border-theme-dim p-4 transform translate-y-full transition-transform duration-300 flex flex-col items-center z-30">
                             <div class="w-full flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-pink-400 uppercase">Lesson Practice</span>
+                                <span class="text-xs font-bold text-theme uppercase">Lesson Practice</span>
                                 <button onclick="toggleLessonPractice()" class="text-gray-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
                             </div>
                             <div class="w-full h-24 bg-black/40 rounded-lg overflow-hidden relative mb-2">
@@ -578,8 +647,8 @@
                     <div class="glass-panel rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col items-center justify-between min-h-[400px] border-pink-500/20">
                          <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-purple-500/5"></div>
                          <div class="z-10 w-full flex flex-wrap justify-between items-center mb-4 gap-2">
-                             <span id="card-category" class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-pink-400 uppercase border border-pink-500/30 px-3 py-1 rounded-full bg-pink-500/10">Bright Vowels</span>
-                             <button onclick="speakWord()" class="p-2 rounded-full bg-white/5 hover:bg-white/10 text-pink-300 border border-pink-500/30 flex items-center gap-2 text-xs font-bold px-3 transition"><i data-lucide="volume-2" class="w-4 h-4"></i> Hear It</button>
+                             <span id="card-category" class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-theme uppercase border border-theme px-3 py-1 rounded-full bg-theme-dim">Bright Vowels</span>
+                             <button onclick="speakWord()" class="p-2 rounded-full bg-white/5 hover:bg-white/10 text-theme border border-theme flex items-center gap-2 text-xs font-bold px-3 transition"><i data-lucide="volume-2" class="w-4 h-4"></i> Hear It</button>
                          </div>
                          <div class="z-10 flex flex-col items-center justify-center flex-grow text-center my-8">
                              <h2 id="card-word" class="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-pink-200 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] mb-6 transition-all duration-300 transform break-words w-full">Heat</h2>
@@ -587,31 +656,52 @@
                          </div>
                          <div class="z-10 w-full flex justify-between items-center gap-2 md:gap-4">
                              <button onclick="changeWord(-1)" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition group"><i data-lucide="arrow-left" class="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-white"></i></button>
-                             <button onclick="toggleMic()" class="flex-1 max-w-[200px] px-4 py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold shadow-lg shadow-pink-500/30 flex items-center justify-center gap-2 transition transform hover:scale-105 active:scale-95 touch-manipulation"><i data-lucide="mic" class="w-5 h-5"></i> <span class="hidden sm:inline">Practice</span></button>
+                             <button onclick="toggleMic()" class="flex-1 max-w-[200px] px-4 py-3 rounded-full bg-theme hover:bg-pink-600 text-white font-bold shadow-lg shadow-pink-500/30 flex items-center justify-center gap-2 transition transform hover:scale-105 active:scale-95 touch-manipulation"><i data-lucide="mic" class="w-5 h-5"></i> <span class="hidden sm:inline">Practice</span></button>
                              <button onclick="changeWord(1)" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition group"><i data-lucide="arrow-right" class="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-white"></i></button>
                          </div>
                     </div>
                 </div>
                 <div id="view-settings" class="view-section hidden fade-in flex-col gap-6 h-full">
                     <div class="glass-panel rounded-3xl p-8 relative overflow-hidden min-h-[400px]">
-                        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-pink-400"></i> Doll Settings</h2>
+                        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-theme"></i> Doll Settings</h2>
                         <div class="space-y-8">
+                            <!-- BACKUP (NEW) -->
+                             <div data-help="Save your progress to a file or load it back.">
+                                <label class="text-theme font-bold text-sm mb-2 block">Data Backup</label>
+                                <div class="flex gap-2">
+                                    <button onclick="exportData()" class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-xs transition flex items-center justify-center gap-2"><i data-lucide="download" class="w-3 h-3"></i> Export</button>
+                                    <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-xs transition flex items-center justify-center gap-2"><i data-lucide="upload" class="w-3 h-3"></i> Import</button>
+                                    <input type="file" id="import-file" style="display:none" onchange="importData(this)">
+                                </div>
+                            </div>
+                            
                             <!-- ARCHETYPES (NEW) -->
                             <div data-help="Select a preset to automatically adjust target pitch ranges.">
-                                <label class="text-pink-300 font-bold text-sm mb-2 block">Voice Archetype</label>
+                                <label class="text-theme font-bold text-sm mb-2 block">Voice Archetype</label>
                                 <div class="grid grid-cols-3 gap-2 mb-4">
                                     <button onclick="setArchetype('vixen')" class="bg-white/5 hover:bg-pink-500/20 border border-white/10 p-2 rounded-lg text-xs transition">Vixen<br><span class="text-[10px] text-gray-400">155-200Hz</span></button>
                                     <button onclick="setArchetype('doll')" class="bg-white/5 hover:bg-pink-500/20 border border-white/10 p-2 rounded-lg text-xs transition">Doll<br><span class="text-[10px] text-gray-400">175-240Hz</span></button>
                                     <button onclick="setArchetype('anime')" class="bg-white/5 hover:bg-pink-500/20 border border-white/10 p-2 rounded-lg text-xs transition">Anime<br><span class="text-[10px] text-gray-400">220-300Hz</span></button>
                                 </div>
                             </div>
+                            
+                            <!-- THEME SELECTOR -->
+                             <div data-help="Customize your app color. Locked for free users.">
+                                <label class="text-theme font-bold text-sm mb-2 block">App Theme <span class="text-[10px] bg-yellow-500 text-black px-1.5 rounded font-bold ml-2">PLUS</span></label>
+                                <div class="grid grid-cols-4 gap-2 mb-4">
+                                    <button onclick="setTheme('pink')" class="h-8 rounded bg-pink-500 border-2 border-white"></button>
+                                    <button onclick="setTheme('purple')" class="h-8 rounded bg-purple-500 border border-white/20 relative"><i data-lucide="lock" class="w-3 h-3 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 theme-lock"></i></button>
+                                    <button onclick="setTheme('gold')" class="h-8 rounded bg-yellow-500 border border-white/20 relative"><i data-lucide="lock" class="w-3 h-3 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 theme-lock"></i></button>
+                                    <button onclick="setTheme('red')" class="h-8 rounded bg-red-600 border border-white/20 relative"><i data-lucide="lock" class="w-3 h-3 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 theme-lock"></i></button>
+                                </div>
+                            </div>
 
-                            <div><div class="flex justify-between mb-2"><label class="text-pink-300 font-bold text-sm">Target Range Start (Hz)</label><span id="val-min" class="text-white font-mono">175 Hz</span></div><input type="range" id="setting-min" min="100" max="250" value="175" oninput="updateSettingsUI()"><p class="text-xs text-gray-400 mt-2">Adjust this if your natural voice is deeper. Default is 175Hz.</p></div>
-                            <div><div class="flex justify-between mb-2"><label class="text-pink-300 font-bold text-sm">Target Range End (Hz)</label><span id="val-max" class="text-white font-mono">240 Hz</span></div><input type="range" id="setting-max" min="200" max="350" value="240" oninput="updateSettingsUI()"><p class="text-xs text-gray-400 mt-2">The upper limit of your comfortable speaking voice.</p></div>
+                            <div><div class="flex justify-between mb-2"><label class="text-theme font-bold text-sm">Target Range Start (Hz)</label><span id="val-min" class="text-white font-mono">175 Hz</span></div><input type="range" id="setting-min" min="100" max="250" value="175" oninput="updateSettingsUI()"><p class="text-xs text-gray-400 mt-2">Adjust this if your natural voice is deeper. Default is 175Hz.</p></div>
+                            <div><div class="flex justify-between mb-2"><label class="text-theme font-bold text-sm">Target Range End (Hz)</label><span id="val-max" class="text-white font-mono">240 Hz</span></div><input type="range" id="setting-max" min="200" max="350" value="240" oninput="updateSettingsUI()"><p class="text-xs text-gray-400 mt-2">The upper limit of your comfortable speaking voice.</p></div>
                             
                             <div class="pt-4 border-t border-white/10">
                                 <div class="flex justify-between items-center mb-4">
-                                    <div class="flex items-center gap-2"><label class="text-pink-300 font-bold text-sm">Coach Persona</label><span class="text-[10px] bg-yellow-500 text-black px-1.5 rounded font-bold">PLUS</span></div>
+                                    <div class="flex items-center gap-2"><label class="text-theme font-bold text-sm">Coach Persona</label><span class="text-[10px] bg-yellow-500 text-black px-1.5 rounded font-bold">PLUS</span></div>
                                     <div class="flex gap-2"><button onclick="setPersona('supportive')" id="persona-supportive" class="px-3 py-1 rounded bg-pink-500 text-white text-xs">Supportive</button><button onclick="setPersona('mistress')" id="persona-mistress" class="px-3 py-1 rounded bg-white/10 text-gray-400 text-xs flex items-center gap-1">Mistress <i data-lucide="lock" class="w-3 h-3"></i></button></div>
                                 </div>
                                 <p class="text-xs text-gray-400">Switch to 'Mistress' for strict, degrading feedback.</p>
@@ -627,281 +717,110 @@
 
     <!-- Scripts -->
     <script>
-        const TUTORIALS = [
-            { 
-                id: 1, 
-                title: "The Whisper Siren", 
-                level: "Beginner", 
-                description: "Learn to raise your larynx naturally without strain.", 
-                steps: [
-                    "Relax your jaw and shoulders completely.",
-                    "Whisper a generic 'E' sound (as in 'Heat').",
-                    "Slowly slide the pitch of your whisper up and down like a siren.",
-                    "Focus on the sensation of your Adam's apple rising as the pitch goes up.",
-                    "Try to hold the high position for 5 seconds."
-                ] 
-            }, 
-            { 
-                id: 2, 
-                title: "Vowel Brightening", 
-                level: "Intermediate", 
-                description: "Shift resonance from chest to head using bright vowels.", 
-                steps: [
-                    "Say the word 'Heat'. Notice how small and buzzy it feels in your mouth?",
-                    "Now say 'Hot'. Notice how it drops to your chest?",
-                    "Your goal: Say 'Hot' but try to keep the buzz in the same place as 'Heat'.",
-                    "Practice shifting between: Hee - Haa - Hoo, keeping them all 'bright'."
-                ] 
-            }, 
-            { 
-                id: 3, 
-                title: "Big Dog, Small Dog", 
-                level: "Fundamentals", 
-                description: "Understanding vocal weight.", 
-                steps: [
-                    "Pant like a big, heavy dog (Hah-Hah-Hah). Feel the chest vibration.",
-                    "Now pant like a tiny chihuahua (Hih-Hih-Hih). Feel it high in the throat.",
-                    "The 'Small Dog' pant is the muscle coordination we want for a feminine voice.",
-                    "Try to speak a simple phrase immediately after the 'Small Dog' pant."
-                ] 
-            }
-        ];
+        const TUTORIALS = [{ id: 1, title: "The Whisper Siren", level: "Beginner", description: "Learn to raise your larynx naturally without strain.", steps: ["Relax your jaw and shoulders completely.", "Whisper a generic 'E' sound (as in 'Heat').", "Slowly slide the pitch of your whisper up and down like a siren.", "Focus on the sensation of your Adam's apple rising as the pitch goes up.", "Try to hold the high position for 5 seconds."] }, { id: 2, title: "Vowel Brightening", level: "Intermediate", description: "Shift resonance from chest to head using bright vowels.", steps: ["Say the word 'Heat'. Notice how small and buzzy it feels in your mouth?", "Now say 'Hot'. Notice how it drops to your chest?", "Your goal: Say 'Hot' but try to keep the buzz in the same place as 'Heat'.", "Practice shifting between: Hee - Haa - Hoo, keeping them all 'bright'."] }, { id: 3, title: "Big Dog, Small Dog", level: "Fundamentals", description: "Understanding vocal weight.", steps: ["Pant like a big, heavy dog (Hah-Hah-Hah). Feel the chest vibration.", "Now pant like a tiny chihuahua (Hih-Hih-Hih). Feel it high in the throat.", "The 'Small Dog' pant is the muscle coordination we want for a feminine voice.", "Try to speak a simple phrase immediately after the 'Small Dog' pant."] }];
         const WORD_BANK = [{ word: "Heat", category: "Bright Vowels", tip: "Smile wide! Feel the buzz behind your top teeth." }, { word: "Key", category: "Bright Vowels", tip: "Keep the tongue high and forward." }, { word: "See", category: "Bright Vowels", tip: "Hissss like a snake first to find the spot." }, { word: "Hey", category: "Soft Onset", tip: "Let a little breath out before the sound." }, { word: "Hi", category: "Soft Onset", tip: "Light and airy, not punchy." }, { word: "Glowing", category: "Intonation", tip: "Glide pitch UP on 'Glo' and down on 'wing'." }, { word: "Shining", category: "Intonation", tip: "Imagine drawing a rainbow with your voice." }, { word: "Dreaming", category: "Intonation", tip: "Stretch the vowels out smoothly." }, { word: "Absolutely", category: "Articulation", tip: "Crisp consonants, light tongue taps." }, { word: "Wonderful", category: "Melody", tip: "Start high, dip low, end middle." }];
         const CONDITIONING_TASKS = [{ id: 0, title: "The Stamina Test", target: "Hold >200Hz", duration: 10, type: "sustain" }, { id: 1, title: "Pitch Perfect", target: "Match 200Hz", duration: 5, type: "match" }];
-        
-        const KINK_TASKS = [
-            { title: "Beg for Attention", text: "Say 'May I speak?' in your highest voice.", duration: 10, minHz: 230 },
-            { title: "The Collar Check", text: "Hold a 220Hz tone. Drop it, and you restart.", duration: 15, minHz: 220 },
-            { title: "Pretty Whimper", text: "Make soft, high noises >240Hz. Don't be loud.", duration: 8, minHz: 240 },
-            { title: "Apologize", text: "Say 'I am sorry for my deep voice' in range.", duration: 12, minHz: 200 },
-            { title: "Sissy Giggles", text: "Laugh lightly and high. Keep it above 250Hz.", duration: 5, minHz: 250 }
-        ];
-        
+        const KINK_TASKS = [{ title: "Beg for Attention", text: "Say 'May I speak?' in your highest voice.", duration: 10, minHz: 230 }, { title: "The Collar Check", text: "Hold a 220Hz tone. Drop it, and you restart.", duration: 15, minHz: 220 }, { title: "Pretty Whimper", text: "Make soft, high noises >240Hz. Don't be loud.", duration: 8, minHz: 240 }, { title: "Apologize", text: "Say 'I am sorry for my deep voice' in range.", duration: 12, minHz: 200 }, { title: "Sissy Giggles", text: "Laugh lightly and high. Keep it above 250Hz.", duration: 5, minHz: 250 }];
         const ORACLE_YES = ["Yes, Queen.", "Absolutely.", "Your voice is compelling.", "He will obey.", "Stunning resonance.", "Perfect.", "Undeniably femme."];
         const ORACLE_NO = ["Try again, sir.", "Too deep.", "Not convincing.", "Silence, boy.", "Weak effort.", "My ears hurt.", "No."];
 
-        let audioContext = null, analyser = null, microphone = null, animationId = null, isListening = false, canvas, ctx, currentWordIndex = 0, userSettings = { minHz: 175, maxHz: 240, persona: 'supportive' }, visualizerMode = 'wave', sessionData = [], sessionStartTime = 0, currentUser = null, progressChart = null, mediaRecorder = null, audioChunks = [], isRecording = false, audioBlobUrl = null, recordingTimeout = null, oscillator = null, gainNode = null, recognition = null, isTalking = false, talkPitchData = [], isScrolling = false, scrollInterval = null, activeTask = null, taskTimer = null, taskSeconds = 0, taskPitchHistory = [];
+        let audioContext = null, analyser = null, microphone = null, animationId = null, isListening = false, canvas, ctx, currentWordIndex = 0, userSettings = { minHz: 175, maxHz: 240, persona: 'supportive', theme: 'pink' }, visualizerMode = 'wave', sessionData = [], sessionStartTime = 0, currentUser = null, progressChart = null, mediaRecorder = null, audioChunks = [], isRecording = false, audioBlobUrl = null, recordingTimeout = null, oscillator = null, gainNode = null, recognition = null, isTalking = false, talkPitchData = [], isScrolling = false, scrollInterval = null, activeTask = null, taskTimer = null, taskSeconds = 0, taskPitchHistory = [];
         let oraclePitchData = []; let isOracleListening = false;
-        let paypalLoaded = false;
-        let isLessonPracticing = false;
-        let lessonCanvas, lessonCtx;
-        let helpMode = false;
+        let isLessonPracticing = false; let lessonCanvas, lessonCtx; let helpMode = false;
+        
+        let noiseCtx = null, noiseNode = null, isNoiseOn = false;
+        let gameCanvas, gameCtx, gameAnimationId, gameScore = 0, gameActive = false, playerY = 150, obstacles = [], frameCount = 0;
 
         window.onload = () => { lucide.createIcons(); checkAuth(); loadSettings(); window.addEventListener('resize', resizeCanvas); resizeCanvas(); };
         function resizeCanvas() { const canvasEl = document.getElementById('audioCanvas'); if(canvasEl && canvasEl.offsetParent !== null) { canvasEl.width = canvasEl.parentElement.offsetWidth; canvasEl.height = 200; } }
 
         function checkAuth() { const storedUser = localStorage.getItem('femvoice_user'); if (storedUser) { currentUser = JSON.parse(storedUser); updateUserDisplay(); document.getElementById('login-modal').classList.add('hidden'); } else { document.getElementById('login-modal').classList.remove('hidden'); } }
         function registerUser() { const input = document.getElementById('username-input'); const name = input.value.trim(); if (name) { currentUser = { name: name, isPremium: false, sessions: [], submissionScore: 0, joined: new Date().toISOString() }; saveUser(); updateUserDisplay(); document.getElementById('login-modal').classList.add('hidden'); } }
-        
-        function checkPremium() { 
-            if (currentUser && currentUser.isPremium) return true; 
-            document.getElementById('premium-modal').classList.remove('hidden'); 
-            return false; 
-        }
-        
+        function checkPremium() { if (currentUser && currentUser.isPremium) return true; document.getElementById('premium-modal').classList.remove('hidden'); return false; }
         function closePremiumModal() { document.getElementById('premium-modal').classList.add('hidden'); }
-        
-        function checkUnlockCode() {
-            const codeInput = document.getElementById('unlock-code-input');
-            const msg = document.getElementById('unlock-msg');
-            const code = codeInput.value.trim().toUpperCase();
-            
-            if (code === 'DOLLPLUS') {
-                unlockPremiumFeatures();
-                msg.innerText = "Success! Unlocking...";
-                msg.className = "text-[10px] mt-2 h-3 font-bold text-green-400";
-            } else {
-                msg.innerText = "Invalid code. Try again.";
-                msg.className = "text-[10px] mt-2 h-3 font-bold text-red-400";
-                codeInput.classList.add('shake-anim');
-                setTimeout(() => codeInput.classList.remove('shake-anim'), 500);
-            }
-        }
-
-        function unlockPremiumFeatures() {
-            if(!currentUser) return;
-            currentUser.isPremium = true;
-            saveUser();
-            updateUserDisplay();
-            closePremiumModal();
-            alert("Welcome to Doll+! 💖\nFeatures unlocked.");
-            lucide.createIcons();
-            updateLockIcons();
-            updateSettingsUI();
-        }
-        
-        function mockPayment() { unlockPremiumFeatures(); }
-
+        function checkUnlockCode() { const codeInput = document.getElementById('unlock-code-input'); const msg = document.getElementById('unlock-msg'); const code = codeInput.value.trim().toUpperCase(); if (code === 'DOLLPLUS') { unlockPremiumFeatures(); msg.innerText = "Success! Unlocking..."; msg.className = "text-[10px] mt-2 h-3 font-bold text-green-400"; } else { msg.innerText = "Invalid code. Try again."; msg.className = "text-[10px] mt-2 h-3 font-bold text-red-400"; codeInput.classList.add('shake-anim'); setTimeout(() => codeInput.classList.remove('shake-anim'), 500); } }
+        function unlockPremiumFeatures() { if(!currentUser) return; currentUser.isPremium = true; saveUser(); updateUserDisplay(); closePremiumModal(); alert("Welcome to Doll+! 💖\nFeatures unlocked."); lucide.createIcons(); updateLockIcons(); updateSettingsUI(); }
         function logout() { if(confirm("Log out?")) { localStorage.removeItem('femvoice_user'); location.reload(); } }
         function saveUser() { localStorage.setItem('femvoice_user', JSON.stringify(currentUser)); }
-        function updateUserDisplay() { 
-            if(currentUser) { 
-                document.getElementById('user-display-name').innerText = currentUser.name; 
-                const badge = document.getElementById('user-display-badge'); const avatar = document.getElementById('avatar-container'); const limitBadge = document.getElementById('mirror-limit-badge');
-                if (currentUser.isPremium) { badge.innerText = "Doll+ Member"; badge.className = "text-[10px] text-yellow-400 uppercase tracking-wider font-bold"; avatar.classList.add('premium-glow'); avatar.classList.replace('from-pink-400', 'from-yellow-400'); avatar.classList.replace('to-purple-500', 'to-yellow-600'); if(limitBadge) { limitBadge.innerText = "Unlimited"; limitBadge.className = "text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded font-bold"; } } 
-                else { badge.innerText = "Level 1 Doll"; avatar.classList.remove('premium-glow'); if(limitBadge) { limitBadge.innerText = "10s Limit"; limitBadge.className = "text-[10px] bg-white/10 text-gray-400 px-2 py-0.5 rounded"; } }
-                document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.name}`; updateScoreboardUI(); updateLockIcons(); 
-            } 
+        function updateUserDisplay() { if(currentUser) { document.getElementById('user-display-name').innerText = currentUser.name; const badge = document.getElementById('user-display-badge'); const avatar = document.getElementById('avatar-container'); const limitBadge = document.getElementById('mirror-limit-badge'); const dlBtn = document.getElementById('download-btn'); if (currentUser.isPremium) { badge.innerText = "Doll+ Member"; badge.className = "text-[10px] text-yellow-400 uppercase tracking-wider font-bold"; avatar.classList.add('premium-glow'); avatar.classList.replace('from-pink-400', 'from-yellow-400'); avatar.classList.replace('to-purple-500', 'to-yellow-600'); if(limitBadge) { limitBadge.innerText = "Unlimited"; limitBadge.className = "text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded font-bold"; } if(dlBtn) { dlBtn.disabled = false; dlBtn.title = "Download"; } } else { badge.innerText = "Level 1 Doll"; avatar.classList.remove('premium-glow'); if(limitBadge) { limitBadge.innerText = "10s Limit"; limitBadge.className = "text-[10px] bg-white/10 text-gray-400 px-2 py-0.5 rounded"; } if(dlBtn) dlBtn.disabled = true; } document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.name}`; updateScoreboardUI(); updateLockIcons(); } }
+        function updateLockIcons() { const isPrem = currentUser && currentUser.isPremium; const chartOverlay = document.getElementById('chart-lock-overlay'); const chartContainer = document.getElementById('chart-container'); if(chartOverlay) { if(isPrem) { chartOverlay.classList.add('hidden'); chartContainer.classList.remove('blur-lock'); } else { chartOverlay.classList.remove('hidden'); chartContainer.classList.add('blur-lock'); } } if(isPrem) { document.getElementById('lock-reading').classList.add('hidden'); document.getElementById('vis-lock-icon').classList.add('hidden'); document.getElementById('lock-stability').classList.add('hidden'); document.getElementById('report-stability').classList.remove('blur-sm', 'opacity-50'); document.getElementById('kink-lock').classList.add('hidden'); document.getElementById('noise-lock').classList.add('hidden'); document.querySelectorAll('.theme-lock').forEach(el => el.classList.add('hidden')); document.getElementById('lock-game').classList.add('hidden'); } else { document.getElementById('lock-reading').classList.remove('hidden'); document.getElementById('vis-lock-icon').classList.remove('hidden'); document.getElementById('lock-stability').classList.remove('hidden'); document.getElementById('report-stability').classList.add('blur-sm', 'opacity-50'); document.getElementById('kink-lock').classList.remove('hidden'); document.getElementById('noise-lock').classList.remove('hidden'); document.querySelectorAll('.theme-lock').forEach(el => el.classList.remove('hidden')); document.getElementById('lock-game').classList.remove('hidden'); } }
+
+        function loadSettings() { const s = localStorage.getItem('femvoice_settings'); if(s) userSettings = JSON.parse(s); if(!userSettings.persona) userSettings.persona = 'supportive'; if(!userSettings.theme) userSettings.theme = 'pink'; applyTheme(userSettings.theme); updateSettingsUI(); updateTargetVisuals(); }
+        function updateSettingsUI() { const minEl = document.getElementById('setting-min'); const maxEl = document.getElementById('setting-max'); if(document.activeElement !== minEl && document.activeElement !== maxEl) { minEl.value = userSettings.minHz; maxEl.value = userSettings.maxHz; } document.getElementById('val-min').innerText = minEl.value + " Hz"; document.getElementById('val-max').innerText = maxEl.value + " Hz"; const suppBtn = document.getElementById('persona-supportive'); const mistBtn = document.getElementById('persona-mistress'); if(userSettings.persona === 'mistress') { mistBtn.classList.replace('bg-white/10', 'bg-red-600'); mistBtn.classList.replace('text-gray-400', 'text-white'); suppBtn.classList.replace('bg-theme', 'bg-white/10'); suppBtn.classList.replace('text-white', 'text-gray-400'); document.getElementById('app-body').classList.add('kink-mode'); } else { suppBtn.classList.replace('bg-white/10', 'bg-theme'); suppBtn.classList.replace('text-gray-400', 'text-white'); mistBtn.classList.replace('bg-red-600', 'bg-white/10'); mistBtn.classList.replace('text-white', 'text-gray-400'); document.getElementById('app-body').classList.remove('kink-mode'); } }
+        function setArchetype(type) { if(type === 'vixen') { userSettings.minHz = 155; userSettings.maxHz = 200; } else if(type === 'doll') { userSettings.minHz = 175; userSettings.maxHz = 240; } else if(type === 'anime') { userSettings.minHz = 220; userSettings.maxHz = 300; } updateSettingsUI(); alert("Persona Calibrated. ✨"); }
+        function setPersona(mode) { if(mode === 'mistress' && !checkPremium()) return; userSettings.persona = mode; updateSettingsUI(); }
+        
+        function setTheme(theme) {
+            if(theme !== 'pink' && !checkPremium()) return;
+            userSettings.theme = theme;
+            applyTheme(theme);
+            alert("Theme Applied! 🎨");
         }
-        function updateLockIcons() { 
-            const isPrem = currentUser && currentUser.isPremium; 
-            const chartOverlay = document.getElementById('chart-lock-overlay'); const chartContainer = document.getElementById('chart-container'); 
-            if(chartOverlay) { if(isPrem) { chartOverlay.classList.add('hidden'); chartContainer.classList.remove('blur-lock'); } else { chartOverlay.classList.remove('hidden'); chartContainer.classList.add('blur-lock'); } }
-            if(isPrem) { document.getElementById('lock-reading').classList.add('hidden'); document.getElementById('vis-lock-icon').classList.add('hidden'); document.getElementById('lock-stability').classList.add('hidden'); document.getElementById('report-stability').classList.remove('blur-sm', 'opacity-50'); document.getElementById('kink-lock').classList.add('hidden'); } 
-            else { document.getElementById('lock-reading').classList.remove('hidden'); document.getElementById('vis-lock-icon').classList.remove('hidden'); document.getElementById('lock-stability').classList.remove('hidden'); document.getElementById('report-stability').classList.add('blur-sm', 'opacity-50'); document.getElementById('kink-lock').classList.remove('hidden'); }
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if(theme === 'pink') { root.style.setProperty('--theme-color', '#ec4899'); root.style.setProperty('--theme-dim', 'rgba(236, 72, 153, 0.2)'); }
+            else if(theme === 'purple') { root.style.setProperty('--theme-color', '#a855f7'); root.style.setProperty('--theme-dim', 'rgba(168, 85, 247, 0.2)'); }
+            else if(theme === 'gold') { root.style.setProperty('--theme-color', '#eab308'); root.style.setProperty('--theme-dim', 'rgba(234, 179, 8, 0.2)'); }
+            else if(theme === 'red') { root.style.setProperty('--theme-color', '#ef4444'); root.style.setProperty('--theme-dim', 'rgba(239, 68, 68, 0.2)'); }
         }
 
-        function loadSettings() { const s = localStorage.getItem('femvoice_settings'); if(s) userSettings = JSON.parse(s); if(!userSettings.persona) userSettings.persona = 'supportive'; updateSettingsUI(); updateTargetVisuals(); }
-        function updateSettingsUI() { 
-            const minEl = document.getElementById('setting-min'); const maxEl = document.getElementById('setting-max'); 
-            if(document.activeElement !== minEl && document.activeElement !== maxEl) { minEl.value = userSettings.minHz; maxEl.value = userSettings.maxHz; } 
-            document.getElementById('val-min').innerText = minEl.value + " Hz"; document.getElementById('val-max').innerText = maxEl.value + " Hz"; 
-            const suppBtn = document.getElementById('persona-supportive'); const mistBtn = document.getElementById('persona-mistress');
-            if(userSettings.persona === 'mistress') { mistBtn.classList.replace('bg-white/10', 'bg-red-600'); mistBtn.classList.replace('text-gray-400', 'text-white'); suppBtn.classList.replace('bg-pink-500', 'bg-white/10'); suppBtn.classList.replace('text-white', 'text-gray-400'); document.getElementById('app-body').classList.add('kink-mode'); } 
-            else { suppBtn.classList.replace('bg-white/10', 'bg-pink-500'); suppBtn.classList.replace('text-gray-400', 'text-white'); mistBtn.classList.replace('bg-red-600', 'bg-white/10'); mistBtn.classList.replace('text-white', 'text-gray-400'); document.getElementById('app-body').classList.remove('kink-mode'); }
+        // NEW: Export/Import Logic
+        function exportData() {
+            if(!currentUser) return;
+            const dataStr = JSON.stringify(currentUser);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'femvoice_backup.json';
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
         }
-        function setArchetype(type) {
-            if(type === 'vixen') { userSettings.minHz = 155; userSettings.maxHz = 200; }
-            else if(type === 'doll') { userSettings.minHz = 175; userSettings.maxHz = 240; }
-            else if(type === 'anime') { userSettings.minHz = 220; userSettings.maxHz = 300; }
-            updateSettingsUI();
-            alert("Persona Calibrated. ✨");
+        function importData(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(data.name && data.sessions) {
+                        currentUser = data;
+                        saveUser();
+                        updateUserDisplay();
+                        alert("Data restored successfully!");
+                    } else { alert("Invalid backup file."); }
+                } catch(err) { alert("Error parsing file."); }
+            };
+            reader.readAsText(file);
         }
-        function setPersona(mode) { if(mode === 'mistress' && !checkPremium()) return; userSettings.persona = mode; updateSettingsUI(); }
+
         function saveSettings() { userSettings.minHz = parseInt(document.getElementById('setting-min').value); userSettings.maxHz = parseInt(document.getElementById('setting-max').value); localStorage.setItem('femvoice_settings', JSON.stringify(userSettings)); updateTargetVisuals(); alert("Settings saved."); switchMode('practice'); }
         function updateTargetVisuals() { const range = 400 - 80; const startPct = ((userSettings.minHz - 80) / range) * 100; const widthPct = ((userSettings.maxHz - userSettings.minHz) / range) * 100; const zone = document.getElementById('target-zone-visual'); if(zone) { zone.style.left = startPct + "%"; zone.style.width = widthPct + "%"; } }
-
         function switchMode(mode) { 
             if (mode === 'reading' && !checkPremium()) return; 
-            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard', 'talk', 'settings', 'reading', 'conditioning', 'oracle']; 
-            if(isListening && mode !== 'practice') toggleMic(); if(isTalking && mode !== 'talk') toggleTalkMode(); if(isScrolling) scrollText(); if(isLessonPracticing) toggleLessonPractice(); stopConditioningTask(); stopTone();
-            views.forEach(v => { const btn = document.getElementById(`btn-${v}`); const view = document.getElementById(`view-${v}`); if (v === mode) { if(btn) { btn.classList.replace('bg-white/5', 'bg-pink-500/20'); btn.classList.replace('text-pink-200', 'text-white'); } view.classList.remove('hidden'); if(v !== 'practice') view.classList.add('flex'); } else { if(btn) { btn.classList.replace('bg-pink-500/20', 'bg-white/5'); btn.classList.replace('text-white', 'text-pink-200'); } view.classList.add('hidden'); view.classList.remove('flex'); } });
-            if(mode === 'tutorials') renderTutorialList(); if(mode === 'vocabulary') updateCard(); if(mode === 'scoreboard') updateScoreboardUI(); if(mode === 'practice') setTimeout(resizeCanvas, 100); lucide.createIcons(); 
+            if (mode === 'game' && !checkPremium()) return;
+            const views = ['practice', 'tutorials', 'vocabulary', 'scoreboard', 'talk', 'settings', 'reading', 'conditioning', 'oracle', 'game']; 
+            if(isListening && mode !== 'practice') toggleMic(); if(isTalking && mode !== 'talk') toggleTalkMode(); if(isScrolling) scrollText(); if(isLessonPracticing) toggleLessonPractice(); stopConditioningTask(); stopTone(); stopGame();
+            views.forEach(v => { const btn = document.getElementById(`btn-${v}`); const view = document.getElementById(`view-${v}`); if (v === mode) { if(btn) { btn.classList.replace('bg-white/5', 'bg-theme-dim'); btn.classList.replace('text-pink-200', 'text-white'); } view.classList.remove('hidden'); if(v !== 'practice') view.classList.add('flex'); } else { if(btn) { btn.classList.replace('bg-theme-dim', 'bg-white/5'); btn.classList.replace('text-white', 'text-pink-200'); } view.classList.add('hidden'); view.classList.remove('flex'); } }); if(mode === 'tutorials') renderTutorialList(); if(mode === 'vocabulary') updateCard(); if(mode === 'scoreboard') updateScoreboardUI(); if(mode === 'practice') setTimeout(resizeCanvas, 100); if(mode === 'game') setTimeout(initGameCanvas, 100); lucide.createIcons(); 
         }
 
-        // ORACLE LOGIC
-        async function toggleOracle() {
-            const btn = document.getElementById('oracle-btn');
-            const text = document.getElementById('oracle-text');
-            if(isOracleListening) {
-                isOracleListening = false;
-                if(audioContext) audioContext.close();
-                if(microphone) microphone.getTracks().forEach(track => track.stop());
-                cancelAnimationFrame(animationId);
-                btn.innerHTML = '<i data-lucide="mic" class="w-4 h-4 inline mr-2"></i> Hold to Ask';
-                
-                if(oraclePitchData.length < 5) {
-                    text.innerText = "I heard nothing.";
-                    return;
-                }
-                const avg = oraclePitchData.reduce((a,b)=>a+b,0) / oraclePitchData.length;
-                
-                if(avg > userSettings.minHz) {
-                    text.innerText = ORACLE_YES[Math.floor(Math.random() * ORACLE_YES.length)];
-                    text.style.color = "#a855f7"; 
-                } else {
-                    text.innerText = ORACLE_NO[Math.floor(Math.random() * ORACLE_NO.length)];
-                    text.style.color = "#ef4444"; 
-                }
-                oraclePitchData = [];
-            } else {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser);
-                    const bufferLength = analyser.frequencyBinCount; const timeDomainArray = new Float32Array(bufferLength);
-                    
-                    isOracleListening = true;
-                    oraclePitchData = [];
-                    text.innerText = "Listening...";
-                    text.style.color = "white";
-                    btn.innerHTML = '<i data-lucide="square" class="w-4 h-4 inline mr-2"></i> Release to Judge';
-                    
-                    const loop = () => { if(!isOracleListening) return; requestAnimationFrame(loop); analyser.getFloatTimeDomainData(timeDomainArray); const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate); if(pitch > 70 && pitch < 500) { oraclePitchData.push(pitch); } }; 
-                    loop();
-                } catch(e) { console.error(e); alert("Mic error."); }
-            }
-            lucide.createIcons();
-        }
-
-        function startConditioningTask(id) { 
-            activeTask = CONDITIONING_TASKS[id]; taskSeconds = activeTask.duration; taskPitchHistory = []; 
-            document.getElementById('task-selection').classList.add('hidden'); document.getElementById('task-active').classList.remove('hidden'); document.getElementById('task-active').classList.add('flex'); 
-            document.getElementById('task-name').innerText = activeTask.title; document.getElementById('task-instruction').innerText = "Keep pitch high!"; document.getElementById('task-instruction').classList.remove('hidden'); document.getElementById('task-timer').innerText = taskSeconds; document.getElementById('task-feedback').innerText = "Get Ready..."; 
-            startTaskAudio(); 
+        function togglePinkNoise() {
+            if(!checkPremium()) return;
+            const btn = document.getElementById('noise-btn');
+            if(isNoiseOn) { if(noiseNode) { noiseNode.stop(); noiseNode.disconnect(); } if(noiseCtx) noiseCtx.close(); isNoiseOn = false; btn.classList.replace('text-white', 'text-gray-400'); btn.classList.replace('bg-theme', 'bg-black/40'); } else { noiseCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 4096; const pinkNoise = (function() { let b0, b1, b2, b3, b4, b5, b6; b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0; const node = noiseCtx.createScriptProcessor(bufferSize, 1, 1); node.onaudioprocess = function(e) { const output = e.outputBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { const white = Math.random() * 2 - 1; b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; output[i] *= 0.11; b6 = white * 0.115926; } }; return node; })(); const gain = noiseCtx.createGain(); gain.gain.value = 0.15; pinkNoise.connect(gain); gain.connect(noiseCtx.destination); noiseNode = { stop: () => { pinkNoise.disconnect(); gain.disconnect(); }, disconnect: () => {} }; isNoiseOn = true; btn.classList.replace('text-gray-400', 'text-white'); btn.classList.replace('bg-black/40', 'bg-theme'); }
         }
         
-        function generateKinkTask() {
-            if(!checkPremium()) return;
-            const randomTask = KINK_TASKS[Math.floor(Math.random() * KINK_TASKS.length)];
-            activeTask = { title: randomTask.title, duration: randomTask.duration, type: "kink", minHz: randomTask.minHz };
-            taskSeconds = activeTask.duration; taskPitchHistory = [];
-            
-            document.getElementById('task-selection').classList.add('hidden'); document.getElementById('task-active').classList.remove('hidden'); document.getElementById('task-active').classList.add('flex');
-            
-            document.getElementById('task-name').innerText = activeTask.title;
-            document.getElementById('task-name').classList.add('text-red-500'); 
-            document.getElementById('task-instruction').innerText = randomTask.text;
-            document.getElementById('task-instruction').classList.remove('hidden');
-            document.getElementById('task-timer').innerText = taskSeconds;
-            document.getElementById('task-feedback').innerText = "Obey.";
-            
-            startTaskAudio();
-        }
+        function downloadRecording() { if(!checkPremium()) return; if(!audioBlobUrl) { alert("Record something first, doll!"); return; } const a = document.createElement('a'); a.href = audioBlobUrl; a.download = `femvoice-session-${new Date().toISOString().slice(0,10)}.wav`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 
+        async function toggleOracle() { const btn = document.getElementById('oracle-btn'); const text = document.getElementById('oracle-text'); if(isOracleListening) { isOracleListening = false; if(audioContext) audioContext.close(); if(microphone) microphone.getTracks().forEach(track => track.stop()); cancelAnimationFrame(animationId); btn.innerHTML = '<i data-lucide="mic" class="w-4 h-4 inline mr-2"></i> Hold to Ask'; if(oraclePitchData.length < 5) { text.innerText = "I heard nothing."; return; } const avg = oraclePitchData.reduce((a,b)=>a+b,0) / oraclePitchData.length; if(avg > userSettings.minHz) { text.innerText = ORACLE_YES[Math.floor(Math.random() * ORACLE_YES.length)]; text.style.color = "#a855f7"; } else { text.innerText = ORACLE_NO[Math.floor(Math.random() * ORACLE_NO.length)]; text.style.color = "#ef4444"; } oraclePitchData = []; } else { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser); const bufferLength = analyser.frequencyBinCount; const timeDomainArray = new Float32Array(bufferLength); isOracleListening = true; oraclePitchData = []; text.innerText = "Listening..."; text.style.color = "white"; btn.innerHTML = '<i data-lucide="square" class="w-4 h-4 inline mr-2"></i> Release to Judge'; const loop = () => { if(!isOracleListening) return; requestAnimationFrame(loop); analyser.getFloatTimeDomainData(timeDomainArray); const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate); if(pitch > 70 && pitch < 500) { oraclePitchData.push(pitch); } }; loop(); } catch(e) { console.error(e); alert("Mic error."); } } lucide.createIcons(); }
+        function startConditioningTask(id) { activeTask = CONDITIONING_TASKS[id]; taskSeconds = activeTask.duration; taskPitchHistory = []; document.getElementById('task-selection').classList.add('hidden'); document.getElementById('task-active').classList.remove('hidden'); document.getElementById('task-active').classList.add('flex'); document.getElementById('task-name').innerText = activeTask.title; document.getElementById('task-instruction').innerText = "Keep pitch high!"; document.getElementById('task-instruction').classList.remove('hidden'); document.getElementById('task-timer').innerText = taskSeconds; document.getElementById('task-feedback').innerText = "Get Ready..."; startTaskAudio(); }
+        function generateKinkTask() { if(!checkPremium()) return; const randomTask = KINK_TASKS[Math.floor(Math.random() * KINK_TASKS.length)]; activeTask = { title: randomTask.title, duration: randomTask.duration, type: "kink", minHz: randomTask.minHz }; taskSeconds = activeTask.duration; taskPitchHistory = []; document.getElementById('task-selection').classList.add('hidden'); document.getElementById('task-active').classList.remove('hidden'); document.getElementById('task-active').classList.add('flex'); document.getElementById('task-name').innerText = activeTask.title; document.getElementById('task-name').classList.add('text-red-500'); document.getElementById('task-instruction').innerText = randomTask.text; document.getElementById('task-instruction').classList.remove('hidden'); document.getElementById('task-timer').innerText = taskSeconds; document.getElementById('task-feedback').innerText = "Obey."; startTaskAudio(); }
         function stopConditioningTask() { if(audioContext) audioContext.close(); if(microphone) microphone.getTracks().forEach(track => track.stop()); cancelAnimationFrame(animationId); clearInterval(taskTimer); document.getElementById('task-active').classList.add('hidden'); document.getElementById('task-active').classList.remove('flex'); document.getElementById('task-result').classList.add('hidden'); document.getElementById('task-result').classList.remove('flex'); document.getElementById('task-selection').classList.remove('hidden'); document.getElementById('task-name').classList.remove('text-red-500'); }
         function resetTaskView() { stopConditioningTask(); }
-        
-        async function startTaskAudio() { 
-            try { 
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser); const bufferLength = analyser.frequencyBinCount; const timeDomainArray = new Float32Array(bufferLength); 
-                const loop = () => { animationId = requestAnimationFrame(loop); analyser.getFloatTimeDomainData(timeDomainArray); const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate); if(pitch > 70 && pitch < 500) { taskPitchHistory.push(pitch); const fb = document.getElementById('task-feedback'); const target = activeTask.type === 'kink' ? activeTask.minHz : userSettings.minHz; if(pitch < target) { fb.innerText = activeTask.type === 'kink' ? "FAILURE!" : "Too Low!"; fb.className = "text-lg font-bold h-8 text-red-500 shake-anim"; } else { fb.innerText = activeTask.type === 'kink' ? "Good Doll." : "Good!"; fb.className = "text-lg font-bold h-8 text-green-400"; fb.classList.remove('shake-anim'); } } }; loop(); 
-                taskTimer = setInterval(() => { taskSeconds--; document.getElementById('task-timer').innerText = taskSeconds; if(taskSeconds <= 0) finishConditioningTask(); }, 1000); 
-            } catch(e) { console.error(e); } 
-        }
-        
-        function finishConditioningTask() {
-            clearInterval(taskTimer); cancelAnimationFrame(animationId); if(audioContext) audioContext.close(); if(microphone) microphone.getTracks().forEach(track => track.stop());
-            document.getElementById('task-active').classList.add('hidden'); document.getElementById('task-active').classList.remove('flex'); document.getElementById('task-result').classList.remove('hidden'); document.getElementById('task-result').classList.add('flex');
-            
-            if(taskPitchHistory.length === 0) { document.getElementById('result-title').innerText = "Error"; document.getElementById('result-msg').innerText = "No audio detected."; return; }
-            
-            const target = activeTask.type === 'kink' ? activeTask.minHz : userSettings.minHz;
-            const valid = taskPitchHistory.filter(hz => hz >= target);
-            const score = (valid.length / taskPitchHistory.length) * 100;
-            const isMistress = userSettings.persona === 'mistress' || activeTask.type === 'kink';
-            
-            let title = "", msg = "";
-            if(score > 80) {
-                title = isMistress ? "Adequate." : "Success! 💖";
-                msg = isMistress ? "You didn't fail completely. Keep practicing." : "Amazing job, doll! You sounded beautiful.";
-                if(activeTask.type === 'kink' && currentUser) { currentUser.submissionScore = (currentUser.submissionScore || 0) + 1; saveUser(); }
-            } else {
-                title = isMistress ? "PATHETIC" : "Failed ❌";
-                if(isMistress) {
-                    const insults = ["You sound like a man.", "Disappointing.", "Is that the best you can do?", "Try again, boy.", "Weak."];
-                    msg = insults[Math.floor(Math.random() * insults.length)];
-                    document.getElementById('result-title').classList.add('text-red-500');
-                } else { msg = "Don't give up! Try raising your larynx."; }
-            }
-            document.getElementById('result-title').innerText = title; document.getElementById('result-msg').innerText = `"${msg}"`;
-        }
-
+        async function startTaskAudio() { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser); const bufferLength = analyser.frequencyBinCount; const timeDomainArray = new Float32Array(bufferLength); const loop = () => { animationId = requestAnimationFrame(loop); analyser.getFloatTimeDomainData(timeDomainArray); const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate); if(pitch > 70 && pitch < 500) { taskPitchHistory.push(pitch); const fb = document.getElementById('task-feedback'); const target = activeTask.type === 'kink' ? activeTask.minHz : userSettings.minHz; if(pitch < target) { fb.innerText = activeTask.type === 'kink' ? "FAILURE!" : "Too Low!"; fb.className = "text-lg font-bold h-8 text-red-500 shake-anim"; } else { fb.innerText = activeTask.type === 'kink' ? "Good Doll." : "Good!"; fb.className = "text-lg font-bold h-8 text-green-400"; fb.classList.remove('shake-anim'); } } }; loop(); taskTimer = setInterval(() => { taskSeconds--; document.getElementById('task-timer').innerText = taskSeconds; if(taskSeconds <= 0) finishConditioningTask(); }, 1000); } catch(e) { console.error(e); } }
+        function finishConditioningTask() { clearInterval(taskTimer); cancelAnimationFrame(animationId); if(audioContext) audioContext.close(); if(microphone) microphone.getTracks().forEach(track => track.stop()); document.getElementById('task-active').classList.add('hidden'); document.getElementById('task-active').classList.remove('flex'); document.getElementById('task-result').classList.remove('hidden'); document.getElementById('task-result').classList.add('flex'); if(taskPitchHistory.length === 0) { document.getElementById('result-title').innerText = "Error"; document.getElementById('result-msg').innerText = "No audio detected."; return; } const target = activeTask.type === 'kink' ? activeTask.minHz : userSettings.minHz; const valid = taskPitchHistory.filter(hz => hz >= target); const score = (valid.length / taskPitchHistory.length) * 100; const isMistress = userSettings.persona === 'mistress' || activeTask.type === 'kink'; let title = "", msg = ""; if(score > 80) { title = isMistress ? "Adequate." : "Success! 💖"; msg = isMistress ? "You didn't fail completely. Keep practicing." : "Amazing job, doll! You sounded beautiful."; if(activeTask.type === 'kink' && currentUser) { currentUser.submissionScore = (currentUser.submissionScore || 0) + 1; saveUser(); } } else { title = isMistress ? "PATHETIC" : "Failed ❌"; if(isMistress) { const insults = ["You sound like a man.", "Disappointing.", "Is that the best you can do?", "Try again, boy.", "Weak."]; msg = insults[Math.floor(Math.random() * insults.length)]; document.getElementById('result-title').classList.add('text-red-500'); } else { msg = "Don't give up! Try raising your larynx."; } } document.getElementById('result-title').innerText = title; document.getElementById('result-msg').innerText = `"${msg}"`; }
         function scrollText() { const btn = document.getElementById('scroll-btn'); const box = document.getElementById('teleprompter'); if(isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.innerHTML = '<i data-lucide="play" class="w-5 h-5"></i>'; btn.classList.replace('bg-pink-500/40', 'bg-pink-500/20'); } else { isScrolling = true; btn.innerHTML = '<i data-lucide="pause" class="w-5 h-5"></i>'; btn.classList.replace('bg-pink-500/20', 'bg-pink-500/40'); let y = 0; scrollInterval = setInterval(() => { y -= 0.5; box.style.transform = `translateY(${y}px)`; if(Math.abs(y) > box.scrollHeight - 200) y = 300; }, 20); } lucide.createIcons(); }
-
-        function updateScoreboardUI() { 
-            if(!currentUser) return; const list = document.getElementById('score-list'); const sessions = currentUser.sessions || []; 
-            
-            // Safe updating with checks
-            const sSessions = document.getElementById('stat-sessions'); if(sSessions) sSessions.innerText = sessions.length;
-            const sBest = document.getElementById('stat-best'); if(sBest) sBest.innerText = sessions.length > 0 ? Math.round(Math.max(...sessions.map(s => s.score))) + "%" : "0%"; 
-            const sAvg = document.getElementById('stat-avg'); if(sAvg) sAvg.innerText = sessions.length > 0 ? Math.round(sessions.reduce((acc, curr) => acc + curr.avgPitch, 0) / sessions.length) + " Hz" : "0 Hz"; 
-            const sSub = document.getElementById('stat-sub'); if(sSub) sSub.innerText = currentUser.submissionScore || 0; 
-            
-            const sorted = [...sessions].reverse().slice(0, 10); list.innerHTML = sorted.length ? '' : '<div class="text-center text-gray-500 py-10 italic">No sessions recorded yet.</div>'; 
-            sorted.forEach(s => { const date = new Date(s.date).toLocaleDateString(); const scoreColor = s.score >= 80 ? 'text-pink-400' : (s.score >= 50 ? 'text-purple-400' : 'text-gray-400'); const item = document.createElement('div'); item.className = "grid grid-cols-12 items-center bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-white/10 transition"; item.innerHTML = `<div class="col-span-6 flex items-center gap-2 md:gap-3"><div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 text-[10px] md:text-xs font-bold shrink-0">${Math.round(s.score)}</div><div class="min-w-0"><div class="text-xs md:text-sm font-bold text-white truncate">${date}</div><div class="text-[8px] md:text-[10px] text-gray-500 truncate">${s.narrative.substring(0, 20)}...</div></div></div><div class="col-span-3 text-center text-xs md:text-sm text-gray-300 font-mono">${Math.round(s.avgPitch)} Hz</div><div class="col-span-3 text-right text-xs md:text-sm font-bold ${scoreColor}">${Math.round(s.score)}%</div>`; list.appendChild(item); }); initChart(sessions); updateLockIcons(); 
-        }
+        function updateScoreboardUI() { if(!currentUser) return; const list = document.getElementById('score-list'); const sessions = currentUser.sessions || []; const sSessions = document.getElementById('stat-sessions'); if(sSessions) sSessions.innerText = sessions.length; const sBest = document.getElementById('stat-best'); if(sBest) sBest.innerText = sessions.length > 0 ? Math.round(Math.max(...sessions.map(s => s.score))) + "%" : "0%"; const sAvg = document.getElementById('stat-avg'); if(sAvg) sAvg.innerText = sessions.length > 0 ? Math.round(sessions.reduce((acc, curr) => acc + curr.avgPitch, 0) / sessions.length) + " Hz" : "0 Hz"; const sSub = document.getElementById('stat-sub'); if(sSub) sSub.innerText = currentUser.submissionScore || 0; const sorted = [...sessions].reverse().slice(0, 10); list.innerHTML = sorted.length ? '' : '<div class="text-center text-gray-500 py-10 italic">No sessions recorded yet.</div>'; sorted.forEach(s => { const date = new Date(s.date).toLocaleDateString(); const scoreColor = s.score >= 80 ? 'text-pink-400' : (s.score >= 50 ? 'text-purple-400' : 'text-gray-400'); const item = document.createElement('div'); item.className = "grid grid-cols-12 items-center bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-white/10 transition"; item.innerHTML = `<div class="col-span-6 flex items-center gap-2 md:gap-3"><div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 text-[10px] md:text-xs font-bold shrink-0">${Math.round(s.score)}</div><div class="min-w-0"><div class="text-xs md:text-sm font-bold text-white truncate">${date}</div><div class="text-[8px] md:text-[10px] text-gray-500 truncate">${s.narrative.substring(0, 20)}...</div></div></div><div class="col-span-3 text-center text-xs md:text-sm text-gray-300 font-mono">${Math.round(s.avgPitch)} Hz</div><div class="col-span-3 text-right text-xs md:text-sm font-bold ${scoreColor}">${Math.round(s.score)}%</div>`; list.appendChild(item); }); initChart(sessions); updateLockIcons(); }
         function initChart(sessions) { const ctx = document.getElementById('progressChart'); if(progressChart) progressChart.destroy(); const data = [...sessions].slice(-10); progressChart = new Chart(ctx, { type: 'line', data: { labels: data.map(s => new Date(s.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})), datasets: [{ label: 'Average Pitch (Hz)', data: data.map(s => s.avgPitch), borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.2)', tension: 0.4, fill: true, pointBackgroundColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, min: 100, max: 300, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af', font: {size: 10} } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1f2937', titleColor: '#fff', bodyColor: '#fff' } } } }); }
-
         function toggleVisualizerMode() { if (visualizerMode === 'wave') { if (!checkPremium()) return; visualizerMode = 'aura'; document.getElementById('vis-mode-label').innerText = 'Aura'; } else { visualizerMode = 'wave'; document.getElementById('vis-mode-label').innerText = 'Wave'; } }
         function autoCorrelate(buffer, sampleRate) { let SIZE = buffer.length, rms = 0; for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i]; rms = Math.sqrt(rms / SIZE); if (rms < 0.01) return -1; let r1 = 0, r2 = SIZE - 1, thres = 0.2; for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buffer[i]) < thres) { r1 = i; break; } for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buffer[SIZE - i]) < thres) { r2 = SIZE - i; break; } buffer = buffer.slice(r1, r2); SIZE = buffer.length; let c = new Array(SIZE).fill(0); for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buffer[j] * buffer[j + i]; let d = 0; while (c[d] > c[d + 1]) d++; let maxval = -1, maxpos = -1; for (let i = d; i < SIZE; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; } let T0 = maxpos, x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1], a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2; if (a) T0 = T0 - b / (2 * a); return sampleRate / T0; }
         async function toggleMic() { const btn = document.getElementById('mic-toggle'); const prompt = document.getElementById('start-prompt'); const feedback = document.getElementById('feedback-text'); if (isListening) { if (audioContext) audioContext.close(); if (microphone) microphone.getTracks().forEach(track => track.stop()); cancelAnimationFrame(animationId); isListening = false; if(btn) { btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 md:w-8 md:h-8"></i>'; btn.classList.remove('pulse-ring'); } if(prompt) prompt.style.display = 'flex'; if(feedback) { feedback.innerText = "Processing session..."; feedback.className = "text-base md:text-lg font-medium text-gray-500"; } analyzeSession(); document.getElementById('pitch-needle').style.left = '0%'; document.getElementById('pitch-display').innerText = '0 Hz'; } else { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphone = stream; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); analyser.fftSize = 2048; const source = audioContext.createMediaStreamSource(stream); source.connect(analyser); isListening = true; sessionData = []; sessionStartTime = Date.now(); if(btn) { btn.innerHTML = '<i data-lucide="pause" class="w-6 h-6 md:w-8 md:h-8"></i>'; btn.classList.add('pulse-ring'); } if(prompt) prompt.style.display = 'none'; if(feedback) { feedback.innerText = "Listening to your beautiful voice..."; feedback.className = "text-base md:text-lg font-medium text-pink-200"; } if(document.getElementById('audioCanvas').offsetParent !== null) startVisualizer(); else runPitchLoop(); } catch (err) { console.error(err); alert("Microphone access needed! Please allow permission."); } } lucide.createIcons(); }
@@ -921,151 +840,6 @@
         function analyzePhrase(text) { const log = document.getElementById('talk-log'); let avgPitch = 0; let feedback = "No audio detected"; let type = "masc"; if(talkPitchData.length > 0) { avgPitch = Math.round(talkPitchData.reduce((a, b) => a + b, 0) / talkPitchData.length); if(avgPitch > userSettings.minHz && avgPitch < userSettings.maxHz) { feedback = "Excellent! Perfect feminine range."; type = "fem"; } else if (avgPitch >= userSettings.minHz - 30 && avgPitch <= userSettings.minHz) { feedback = "Good, aiming for androgynous."; type = "andro"; } else if (avgPitch < userSettings.minHz - 30) { feedback = "A bit deep. Try raising your larynx."; type = "masc"; } else { feedback = "Very high! Be careful of strain."; type = "fem"; } } const bubble = document.createElement('div'); bubble.className = `chat-bubble ${type} fade-in`; bubble.innerHTML = `<div class="font-bold text-white mb-1">"${text}"</div><div class="flex justify-between items-center text-xs"><span class="text-pink-300 font-mono">${avgPitch > 0 ? avgPitch + ' Hz' : '--'}</span><span class="text-gray-400 italic">${feedback}</span></div>`; log.appendChild(bubble); log.scrollTop = log.scrollHeight; }
         function changeWord(d) { currentWordIndex += d; if(currentWordIndex < 0) currentWordIndex = WORD_BANK.length - 1; if(currentWordIndex >= WORD_BANK.length) currentWordIndex = 0; updateCard(); }
         
-        // --- NEW TUTORIAL LOGIC ---
-        function renderTutorialList() { 
-            const list = document.getElementById('tutorial-list'); list.innerHTML = ''; 
-            TUTORIALS.forEach(tut => { 
-                const item = document.createElement('div'); 
-                item.className = "glass-panel p-4 md:p-6 rounded-3xl hover:bg-white/5 transition cursor-pointer group"; 
-                item.onclick = () => openTutorial(tut); 
-                item.innerHTML = `<div class="flex justify-between items-center"><div><span class="text-xs text-pink-400 font-bold tracking-wider uppercase mb-1 block">${tut.level}</span><h3 class="text-lg md:text-xl font-bold text-white mb-1 group-hover:text-pink-300 transition">${tut.title}</h3><p class="text-xs md:text-sm text-gray-400 line-clamp-2">${tut.description}</p></div><div class="bg-pink-500/20 p-2 md:p-3 rounded-full group-hover:bg-pink-500 group-hover:text-white transition text-pink-500 ml-4 shrink-0"><i data-lucide="arrow-right" class="w-4 h-4 md:w-5 md:h-5"></i></div></div>`; 
-                list.appendChild(item); 
-            }); 
-            lucide.createIcons(); 
-        }
-        function openTutorial(tut) { 
-            document.getElementById('tutorial-list').classList.add('hidden'); 
-            document.getElementById('tutorial-detail').classList.remove('hidden'); 
-            document.getElementById('tut-title').innerText = tut.title; 
-            document.getElementById('tut-desc').innerText = tut.description; 
-            const steps = document.getElementById('tut-steps'); steps.innerHTML = ''; 
-            tut.steps.forEach((step, idx) => { 
-                steps.innerHTML += `
-                <div class="flex flex-col gap-2 p-3 bg-white/5 rounded-xl border border-white/5">
-                    <div class="flex gap-3 md:gap-4 items-start">
-                        <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-pink-500/20 border border-pink-500/50 flex items-center justify-center text-pink-300 text-sm md:text-base font-bold shrink-0">${idx + 1}</div>
-                        <p class="text-sm md:text-lg text-gray-200 pt-0.5">${step}</p>
-                    </div>
-                    <div class="flex justify-end">
-                        <button onclick="playStepAudio('${step.replace(/'/g, "\\'")}')" class="text-xs bg-white/10 hover:bg-white/20 text-pink-200 px-3 py-1 rounded-full flex items-center gap-1 transition"><i data-lucide="volume-2" class="w-3 h-3"></i> Hear It</button>
-                    </div>
-                </div>`; 
-            }); 
-            lucide.createIcons();
-        }
-        function closeTutorial() { 
-            document.getElementById('tutorial-detail').classList.add('hidden'); 
-            document.getElementById('tutorial-list').classList.remove('hidden'); 
-            if(isLessonPracticing) toggleLessonPractice();
-        }
-        
-        function playStepAudio(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.pitch = 1.5; 
-                utterance.rate = 0.9;
-                const voices = window.speechSynthesis.getVoices();
-                const femVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google US English'));
-                if(femVoice) utterance.voice = femVoice;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-        
-        function toggleLessonPractice() {
-            const area = document.getElementById('lesson-practice-area');
-            const btn = document.getElementById('lesson-practice-btn');
-            
-            if(isLessonPracticing) {
-                // CLOSE
-                isLessonPracticing = false;
-                area.classList.add('translate-y-full');
-                btn.innerHTML = '<i data-lucide="mic" class="w-3 h-3"></i> Try It';
-                btn.classList.replace('bg-gray-500', 'bg-pink-500');
-                
-                if(audioContext) audioContext.close();
-                if(microphone) microphone.getTracks().forEach(track => track.stop());
-                cancelAnimationFrame(animationId);
-                
-            } else {
-                // OPEN
-                isLessonPracticing = true;
-                area.classList.remove('translate-y-full');
-                btn.innerHTML = 'Stop';
-                btn.classList.replace('bg-pink-500', 'bg-gray-500');
-                
-                // Start Mini Visualizer
-                startLessonAudio();
-            }
-            lucide.createIcons();
-        }
-        
-        async function startLessonAudio() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                microphone = stream;
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-                const source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
-                
-                lessonCanvas = document.getElementById('lessonCanvas');
-                lessonCtx = lessonCanvas.getContext('2d');
-                lessonCanvas.width = lessonCanvas.parentElement.offsetWidth;
-                lessonCanvas.height = 100;
-                
-                const bufferLength = analyser.frequencyBinCount;
-                const timeDomainArray = new Float32Array(bufferLength);
-                
-                const loop = () => {
-                    if(!isLessonPracticing) return;
-                    animationId = requestAnimationFrame(loop);
-                    
-                    analyser.getFloatTimeDomainData(timeDomainArray);
-                    const pitch = autoCorrelate(timeDomainArray, audioContext.sampleRate);
-                    
-                    // Update Text
-                    const display = document.getElementById('lesson-pitch-display');
-                    const feedback = document.getElementById('lesson-feedback');
-                    
-                    if(pitch > 70 && pitch < 500) {
-                        display.innerText = Math.round(pitch) + " Hz";
-                        feedback.style.opacity = 0;
-                        if(pitch > userSettings.minHz && pitch < userSettings.maxHz) display.style.color = "#4ade80";
-                        else display.style.color = "#9ca3af";
-                    } else {
-                        feedback.style.opacity = 1;
-                    }
-                    
-                    // Draw Visuals (Simple Line)
-                    lessonCtx.clearRect(0, 0, lessonCanvas.width, lessonCanvas.height);
-                    lessonCtx.lineWidth = 2;
-                    lessonCtx.strokeStyle = "#ec4899";
-                    lessonCtx.beginPath();
-                    const sliceWidth = lessonCanvas.width * 1.0 / bufferLength;
-                    let x = 0;
-                    for (let i = 0; i < bufferLength; i+=4) {
-                        const v = timeDomainArray[i] * 5; 
-                        const y = lessonCanvas.height / 2 + v * (lessonCanvas.height / 2);
-                        if (i === 0) lessonCtx.moveTo(x, y); else lessonCtx.lineTo(x, y);
-                        x += sliceWidth * 4;
-                    }
-                    lessonCtx.stroke();
-                };
-                loop();
-                
-            } catch(e) {
-                console.error(e);
-                alert("Mic error in lesson mode.");
-                toggleLessonPractice();
-            }
-        }
-        
-        // --- HELP / GUIDE MODE ---
-        // Variable helpMode already declared above implicitly? No, I removed it.
-        // Wait, I need to make sure I didn't declare it twice in the previous logic.
-        
         function toggleHelpMode() {
             helpMode = !helpMode;
             const modal = document.getElementById('help-modal');
@@ -1073,50 +847,143 @@
             const btn = document.getElementById('help-toggle-btn');
             
             if(helpMode) {
-                // Show intro modal briefly or rely on highlights
-                // Let's show the modal to explain what to do
                 document.getElementById('help-title').innerText = "Guide Mode";
                 document.getElementById('help-text').innerText = "Tap any highlighted element to learn what it does.";
                 modal.classList.remove('hidden');
                 
-                // Add highlights
-                document.querySelectorAll('[data-help]').forEach(el => {
-                    el.classList.add('help-highlight');
-                });
-                mainContent.classList.add('blur-background');
+                document.querySelectorAll('[data-help]').forEach(el => { el.classList.add('help-highlight'); });
                 btn.classList.add('text-yellow-400');
             } else {
                 modal.classList.add('hidden');
-                document.querySelectorAll('[data-help]').forEach(el => {
-                    el.classList.remove('help-highlight');
-                });
-                mainContent.classList.remove('blur-background');
+                document.querySelectorAll('[data-help]').forEach(el => { el.classList.remove('help-highlight'); });
                 btn.classList.remove('text-yellow-400');
             }
         }
+        function closeHelpModal() { document.getElementById('help-modal').classList.add('hidden'); }
+        document.addEventListener('click', function(e) { if(!helpMode) return; const target = e.target.closest('[data-help]'); if(target) { e.preventDefault(); e.stopPropagation(); document.getElementById('help-title').innerText = target.innerText.split('\n')[0] || "Feature"; document.getElementById('help-text').innerText = target.getAttribute('data-help'); document.getElementById('help-modal').classList.remove('hidden'); } }, true); 
         
-        function closeHelpModal() {
-            document.getElementById('help-modal').classList.add('hidden');
-            // Does NOT turn off help mode, allows user to click other items
+        // --- GAME LOGIC ---
+        function initGameCanvas() {
+            gameCanvas = document.getElementById('game-canvas');
+            if(!gameCanvas) return;
+            gameCanvas.width = gameCanvas.parentElement.offsetWidth;
+            gameCanvas.height = 300;
+            gameCtx = gameCanvas.getContext('2d');
         }
         
-        // Add click listener for help mode
-        document.addEventListener('click', function(e) {
-            if(!helpMode) return;
+        async function startGame() {
+            if(gameActive) return;
             
-            // Check if clicked element has data-help
-            const target = e.target.closest('[data-help]');
-            
-            if(target) {
-                e.preventDefault();
-                e.stopPropagation();
+            try {
+                if(!audioContext) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    microphone = stream;
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                }
                 
-                // Show info in modal
-                document.getElementById('help-title').innerText = target.innerText.split('\n')[0] || "Feature";
-                document.getElementById('help-text').innerText = target.getAttribute('data-help');
-                document.getElementById('help-modal').classList.remove('hidden');
+                gameActive = true;
+                gameScore = 0;
+                obstacles = [];
+                frameCount = 0;
+                document.getElementById('game-overlay').classList.add('hidden');
+                document.getElementById('game-score').innerText = gameScore;
+                
+                // Start Loop
+                gameLoop();
+                
+            } catch(e) { console.error(e); alert("Mic needed for game."); }
+        }
+        
+        function stopGame() {
+            gameActive = false;
+            cancelAnimationFrame(gameAnimationId);
+            if(document.getElementById('game-overlay')) {
+                document.getElementById('game-overlay').classList.remove('hidden');
+                document.querySelector('#game-overlay h3').innerText = "Game Over";
+                document.querySelector('#game-overlay p').innerText = "Score: " + gameScore;
+                document.querySelector('#game-overlay button').innerText = "Play Again";
             }
-        }, true); // Capture phase to prevent default actions
+        }
+        
+        function gameLoop() {
+            if(!gameActive) return;
+            gameAnimationId = requestAnimationFrame(gameLoop);
+            
+            // Audio Input
+            const bufferLength = analyser.frequencyBinCount;
+            const timeDomain = new Float32Array(bufferLength);
+            analyser.getFloatTimeDomainData(timeDomain);
+            const pitch = autoCorrelate(timeDomain, audioContext.sampleRate);
+            
+            // Player Movement (Target 175-250Hz range maps to canvas height)
+            let targetY = gameCanvas.height / 2;
+            if(pitch > 70 && pitch < 500) {
+                // Map pitch to Y. 150Hz = bottom, 300Hz = top
+                const minP = 150; const maxP = 300;
+                const norm = Math.max(0, Math.min(1, (pitch - minP) / (maxP - minP)));
+                targetY = gameCanvas.height - (norm * gameCanvas.height);
+            } else {
+                 // Gravity if silent
+                 targetY = gameCanvas.height - 20; 
+            }
+            // Smooth movement
+            playerY += (targetY - playerY) * 0.1;
+            
+            // Logic
+            frameCount++;
+            if(frameCount % 100 === 0) {
+                // Spawn Obstacle
+                obstacles.push({ x: gameCanvas.width, w: 20, h: 50, y: Math.random() * (gameCanvas.height - 100), type: 'wall' });
+            }
+             if(frameCount % 150 === 0) {
+                // Spawn Heart
+                obstacles.push({ x: gameCanvas.width, w: 20, h: 20, y: Math.random() * (gameCanvas.height - 40), type: 'heart' });
+            }
+            
+            // Draw
+            gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            
+            // Player
+            gameCtx.fillStyle = '#ec4899';
+            gameCtx.beginPath();
+            gameCtx.arc(50, playerY, 10, 0, Math.PI*2);
+            gameCtx.fill();
+            
+            // Obstacles
+            for(let i = obstacles.length - 1; i >= 0; i--) {
+                let o = obstacles[i];
+                o.x -= 3; // Speed
+                
+                if(o.type === 'wall') {
+                    gameCtx.fillStyle = '#ef4444';
+                    gameCtx.fillRect(o.x, o.y, o.w, o.h);
+                    // Collision
+                    if(50 > o.x && 50 < o.x + o.w && playerY > o.y && playerY < o.y + o.h) {
+                        stopGame();
+                    }
+                } else if (o.type === 'heart') {
+                    gameCtx.fillStyle = '#eab308';
+                    gameCtx.beginPath(); gameCtx.arc(o.x + 10, o.y + 10, 10, 0, Math.PI*2); gameCtx.fill();
+                    // Collect
+                    if(Math.abs(50 - (o.x+10)) < 20 && Math.abs(playerY - (o.y+10)) < 20) {
+                        gameScore += 10;
+                        document.getElementById('game-score').innerText = gameScore;
+                        obstacles.splice(i, 1);
+                        continue;
+                    }
+                }
+                
+                if(o.x < -50) obstacles.splice(i, 1);
+            }
+            
+            // Score
+            gameScore++;
+            if(gameScore % 10 === 0) document.getElementById('game-score').innerText = gameScore;
+        }
 
     </script>
 </body>
